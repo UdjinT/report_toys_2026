@@ -1,6 +1,8 @@
 export async function handleTelegramUpdate(update: any, token: string) {
   try {
     console.log('🤖 Update received:', update.update_id);
+    console.log('Token length:', token?.length || 0);
+    console.log('Token first 10 chars:', token?.substring(0, 10) || 'UNDEFINED');
 
     const message = update.message;
     if (!message || !message.chat || !message.from) {

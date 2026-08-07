@@ -44,6 +44,13 @@ export default {
       });
     }
 
+    // Test endpoint
+    if (pathname === '/test') {
+      return new Response(JSON.stringify({ status: 'OK', time: new Date().toISOString() }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Handle Telegram webhook
     if (pathname === '/webhook/telegram') {
       console.log('🔔 Webhook path matched, method:', request.method);
