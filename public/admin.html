@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Report Toys — Админ Панель</title>
+	<link href="/assets/css/tabler.min.css" rel="stylesheet" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		html, body {
+			transition: background-color 0.3s, color 0.3s;
+		}
+		body {
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+		}
+		.page-wrapper {
+			padding: 1.5rem 0;
+		}
+		.navbar-brand-autodark {
+			color: var(--bs-body-color) !important;
+		}
+		.stat-card {
+			min-height: 120px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+		.stat-value {
+			font-size: 1.75rem;
+			font-weight: 700;
+			margin-bottom: 0.25rem;
+		}
+		.stat-label {
+			font-size: 0.85rem;
+			color: var(--bs-gray-600);
+		}
+		.chart-container {
+			position: relative;
+			height: 300px;
+		}
+		.list-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			padding: 0.75rem 0;
+			border-bottom: 1px solid var(--bs-border-color);
+		}
+		.list-item:last-child {
+			border-bottom: none;
+		}
+		.list-time {
+			font-weight: 600;
+			color: var(--bs-body-color);
+			font-size: 0.95rem;
+		}
+		.list-details {
+			color: var(--bs-gray-600);
+			font-size: 0.875rem;
+			margin-top: 0.25rem;
+		}
+		.list-amount {
+			font-weight: 700;
+			color: #198754;
+			font-size: 1rem;
+		}
+		.status-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.35rem 0.75rem;
+			background: rgba(25, 135, 84, 0.1);
+			border: 1px solid rgba(25, 135, 84, 0.2);
+			color: #198754;
+			border-radius: 0.25rem;
+			font-size: 0.85rem;
+			font-weight: 500;
+		}
+		#theme-toggle {
+			display: inline-flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			width: 44px !important;
+			height: 44px !important;
+			padding: 0 !important;
+			background-color: transparent !important;
+			border: 1px solid var(--bs-border-color) !important;
+			cursor: pointer;
+			transition: all 0.2s;
+			border-radius: 0.25rem;
+		}
+		#theme-toggle:hover {
+			background-color: rgba(6, 111, 209, 0.1) !important;
+			border-color: #066fd1 !important;
+		}
+		[data-bs-theme="dark"] #theme-toggle {
+			border-color: #30363d !important;
+		}
+		[data-bs-theme="dark"] #theme-toggle:hover {
+			background-color: rgba(88, 166, 255, 0.15) !important;
+			border-color: #58a6ff !important;
+		}
+		/* Light theme (default) */
+		html[data-bs-theme="light"] {
+			--bs-body-bg: #ffffff;
+			--bs-body-color: #212529;
+			--bs-border-color: #dee2e6;
+			--bs-gray-600: #6c757d;
+		}
+		html[data-bs-theme="light"] body {
+			background-color: #ffffff !important;
+			color: #212529 !important;
+		}
+
+		/* Dark theme */
+		html[data-bs-theme="dark"] {
+			--bs-body-bg: #0d1117;
+			--bs-body-color: #c9d1d9;
+			--bs-border-color: #30363d;
+			--bs-gray-600: #8b949e;
+		}
+		html[data-bs-theme="dark"] body {
+			background-color: #0d1117 !important;
+			color: #c9d1d9 !important;
+		}
+		html[data-bs-theme="dark"] .card {
+			background-color: #161b22 !important;
+			border-color: #30363d !important;
+			color: #c9d1d9 !important;
+		}
+		html[data-bs-theme="dark"] .card-header {
+			background-color: #0d1117 !important;
+			border-color: #30363d !important;
+		}
+		html[data-bs-theme="dark"] .card-body {
+			color: #c9d1d9 !important;
+		}
+		html[data-bs-theme="dark"] .card-title {
+			color: #c9d1d9 !important;
+		}
+		html[data-bs-theme="dark"] .form-control,
+		html[data-bs-theme="dark"] .form-select {
+			background-color: #0d1117 !important;
+			border-color: #30363d !important;
+			color: #c9d1d9 !important;
+		}
+		html[data-bs-theme="dark"] .form-control::placeholder {
+			color: #8b949e !important;
+		}
+		html[data-bs-theme="dark"] .table {
+			color: #c9d1d9 !important;
+			border-color: #30363d !important;
+		}
+		html[data-bs-theme="dark"] .table th {
+			background-color: #0d1117 !important;
+			border-color: #30363d !important;
+			color: #c9d1d9 !important;
+		}
+		html[data-bs-theme="dark"] .table td {
+			border-color: #30363d !important;
+		}
+		html[data-bs-theme="dark"] .table tbody tr:hover {
+			background-color: rgba(255, 255, 255, 0.05) !important;
+		}
+		html[data-bs-theme="dark"] .btn {
+			color: #c9d1d9;
+		}
+		html[data-bs-theme="dark"] .btn-outline-primary {
+			color: #58a6ff !important;
+			border-color: #58a6ff !important;
+		}
+		html[data-bs-theme="dark"] .btn-outline-primary:hover {
+			background-color: #58a6ff !important;
+			color: #0d1117 !important;
+		}
+		html[data-bs-theme="dark"] .page-header {
+			background-color: #0d1117 !important;
+			border-color: #30363d !important;
+		}
+		html[data-bs-theme="dark"] .text-muted {
+			color: #8b949e !important;
+		}
+		.filter-cols {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 1.5rem;
+		}
+		@media (max-width: 1200px) {
+			.filter-cols {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+		@media (max-width: 768px) {
+			.filter-cols {
+				grid-template-columns: 1fr;
+			}
+			.chart-container {
+				height: 250px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<!-- Navbar -->
+	<div style="background-color: transparent; border-bottom: none; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+		<span style="font-size: 1.25rem; font-weight: 600; color: var(--bs-body-color);">Report Toys</span>
+		<div style="display: flex; gap: 0.5rem; align-items: center;">
+			<button id="logoutBtn" title="Выход" style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; background-color: transparent; border: 1px solid var(--bs-border-color); cursor: pointer; transition: all 0.2s; border-radius: 0.25rem; color: var(--bs-body-color);">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+					<polyline points="16 17 21 12 16 7"></polyline>
+					<line x1="21" y1="12" x2="9" y2="12"></line>
+				</svg>
+			</button>
+			<button id="theme-toggle" title="Переключить тему (светлая/тёмная)">
+			<svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+				<circle cx="12" cy="12" r="5"></circle>
+				<line x1="12" y1="1" x2="12" y2="3"></line>
+				<line x1="12" y1="21" x2="12" y2="23"></line>
+				<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+				<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+				<line x1="1" y1="12" x2="3" y2="12"></line>
+				<line x1="21" y1="12" x2="23" y2="12"></line>
+				<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+				<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+			</svg>
+			<svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+			</svg>
+		</button>
+		</div>
+	</div>
+
+	<!-- Page wrapper -->
+	<div class="page-wrapper">
+		<div class="container-xl">
+			<!-- Page header -->
+			<div class="page-header d-print-none mb-4">
+				<div class="row align-items-center">
+					<div class="col">
+						<h2 class="page-title">Dashboard</h2>
+						<p class="text-muted" style="margin-top: 0.25rem;">Полный контроль над точками, автоматами и инкассациями</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- KPI Cards -->
+		<div class="container-xl">
+			<div class="row row-deck row-cards mb-4">
+				<div class="col-sm-6 col-lg-3">
+					<div class="card stat-card">
+						<div class="card-body">
+							<div class="stat-value" id="totalRevenue">0 ₴</div>
+							<div class="stat-label">Общая выручка</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6 col-lg-3">
+					<div class="card stat-card">
+						<div class="card-body">
+							<div class="stat-value" id="collectionsTotal">0</div>
+							<div class="stat-label">Инкассаций</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6 col-lg-3">
+					<div class="card stat-card">
+						<div class="card-body">
+							<div class="stat-value" id="pointsTotal">0</div>
+							<div class="stat-label">Точек</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6 col-lg-3">
+					<div class="card stat-card">
+						<div class="card-body">
+							<div class="stat-value" id="machinesTotal">0</div>
+							<div class="stat-label">Автоматов</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Date Range Modal -->
+		<div id="dateRangeModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+			<div style="background: white; padding: 2rem; border-radius: 0.25rem; min-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.16);">
+				<h3 style="margin-top: 0; margin-bottom: 1.5rem;">Выберите период</h3>
+				<div style="margin-bottom: 1rem;">
+					<label class="form-label">С даты:</label>
+					<input type="date" id="modalDateFrom" class="form-control">
+				</div>
+				<div style="margin-bottom: 1.5rem;">
+					<label class="form-label">По дату:</label>
+					<input type="date" id="modalDateTo" class="form-control">
+				</div>
+				<div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+					<button class="btn btn-outline-primary" id="closeDateModal">Отмена</button>
+					<button class="btn btn-primary" id="applyDateRange">Применить</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Filters -->
+		<div class="container-xl mb-4">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Фильтры и период</h3>
+				</div>
+				<div class="card-body">
+					<div class="filter-cols">
+						<div>
+							<label class="form-label">Город</label>
+							<select id="citySelect" class="form-select">
+								<option value="odesa">Одесса</option>
+							</select>
+						</div>
+						<div>
+							<label class="form-label">Точка</label>
+							<select id="pointSelect" class="form-select">
+								<option value="all">Все точки</option>
+							</select>
+						</div>
+						<div>
+							<label class="form-label">Автомат</label>
+							<select id="machineSelect" class="form-select">
+								<option value="all">Все автоматы</option>
+							</select>
+						</div>
+						<div>
+							<label class="form-label">Интервал группировки</label>
+							<select id="intervalSelect" class="form-select">
+								<option value="day">По дням</option>
+								<option value="week">По неделям</option>
+								<option value="month">По месяцам</option>
+							</select>
+						</div>
+					</div>
+					<div style="margin-top: 1.5rem;">
+						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+							<div>
+								<label class="form-label">Быстрый выбор периода:</label>
+								<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+									<button class="btn btn-sm btn-primary active" data-days="7">7 дней</button>
+									<button class="btn btn-sm btn-outline-primary" data-days="14">14 дней</button>
+									<button class="btn btn-sm btn-outline-primary" data-days="30">30 дней</button>
+									<button class="btn btn-sm btn-outline-primary" data-days="90">90 дней</button>
+									<div style="width: 1px; height: 24px; background: #dee2e6; margin: 0 0.5rem;"></div>
+									<button class="btn btn-sm btn-outline-primary" id="openDateRangeModal" style="padding: 0.375rem 0.75rem;">📅 Период</button>
+								</div>
+							</div>
+							<div>
+								<label class="form-label">Группировка графиков:</label>
+								<div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+									<button class="btn btn-sm btn-primary active" id="groupAll">Все</button>
+									<button class="btn btn-sm btn-outline-primary" id="groupPoints">По точкам</button>
+									<button class="btn btn-sm btn-outline-primary" id="groupMachines">По автоматам</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Charts -->
+		<div class="container-xl mb-4">
+			<div class="card">
+				<div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+					<h3 class="card-title" style="margin: 0;">Динамика выручки</h3>
+					<div style="display: flex; gap: 0.5rem; align-items: center;">
+						<label class="form-label" style="margin: 0; margin-right: 0.5rem;">С даты:</label>
+						<input type="date" id="dateFrom" class="form-control" style="width: 150px; padding: 0.375rem 0.75rem;">
+						<label class="form-label" style="margin: 0; margin-left: 1rem; margin-right: 0.5rem;">По дату:</label>
+						<input type="date" id="dateTo" class="form-control" style="width: 150px; padding: 0.375rem 0.75rem;">
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="revenueLegend" style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;"></div>
+					<div class="chart-container" style="height: 350px;">
+						<canvas id="revenueChart"></canvas>
+					</div>
+				</div>
+			</div>
+
+			<div class="card" style="margin-top: 2rem;">
+				<div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+					<h3 class="card-title" style="margin: 0;">Инкассации по датам</h3>
+					<div style="display: flex; gap: 0.5rem;">
+						<button class="btn btn-sm btn-primary" id="collectionsModeRevenue" style="padding: 0.375rem 0.75rem;">Сумма</button>
+						<button class="btn btn-sm btn-outline-primary" id="collectionsModeCounts" style="padding: 0.375rem 0.75rem;">Количество</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="chart-container" style="height: 350px;">
+						<canvas id="collectionsChart"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Summary Table -->
+		<div class="container-xl mb-4">
+			<div class="card">
+				<div class="card-header">
+					<div style="display: flex; justify-content: space-between; align-items: center;">
+						<h3 class="card-title">Сводка по точкам и автоматам</h3>
+						<span class="status-badge">Авто-обновление</span>
+					</div>
+				</div>
+				<div class="table-responsive">
+					<table class="table card-table table-vcenter">
+						<thead>
+							<tr>
+								<th>Точка</th>
+								<th>Автомат</th>
+								<th>Инкассаций</th>
+								<th>Выручка</th>
+								<th>Товаров</th>
+								<th>Средняя выручка</th>
+							</tr>
+						</thead>
+						<tbody id="summaryTable">
+							<tr>
+								<td colspan="6" style="text-align: center; color: var(--bs-gray-600);">Загрузка данных...</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- Recent Collections & Machine Log -->
+		<div class="container-xl mb-4">
+			<div class="row row-deck row-cards">
+				<div class="col-lg-9">
+					<div class="card">
+						<div class="card-header">
+							<h3 class="card-title">Последние инкассации</h3>
+						</div>
+						<div class="card-body">
+							<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+								<div>
+									<label style="display: block; font-size: 0.75rem; color: var(--bs-gray-600); margin-bottom: 0.25rem;">Точка</label>
+									<select id="recentPointFilter" class="form-control" style="padding: 0.375rem 0.75rem; font-size: 0.875rem; width: 100%;">
+										<option value="">Все точки</option>
+									</select>
+								</div>
+								<div>
+									<label style="display: block; font-size: 0.75rem; color: var(--bs-gray-600); margin-bottom: 0.25rem;">Автомат</label>
+									<select id="recentMachineFilter" class="form-control" style="padding: 0.375rem 0.75rem; font-size: 0.875rem; width: 100%;">
+										<option value="">Все автоматы</option>
+									</select>
+								</div>
+								<div>
+									<label style="display: block; font-size: 0.75rem; color: var(--bs-gray-600); margin-bottom: 0.25rem;">Инкассатор</label>
+									<select id="recentCollectorFilter" class="form-control" style="padding: 0.375rem 0.75rem; font-size: 0.875rem; width: 100%;">
+										<option value="">Все инкассаторы</option>
+									</select>
+								</div>
+							</div>
+							<div id="recentList" style="color: var(--bs-gray-600); text-align: center; padding: 2rem 0;">Загрузка...</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3">
+					<div class="card">
+						<div class="card-header">
+							<h3 class="card-title" style="font-size: 1rem;">Статистика</h3>
+						</div>
+						<div class="card-body">
+							<div style="display: flex; flex-direction: column; gap: 1rem;">
+								<div>
+									<div style="font-size: 0.75rem; color: var(--bs-gray-600);">Всего инкассаций</div>
+									<div id="statsCount" style="font-size: 1.5rem; font-weight: 700;">—</div>
+								</div>
+								<div>
+									<div style="font-size: 0.75rem; color: var(--bs-gray-600);">Сумма</div>
+									<div id="statsSum" style="font-size: 1.5rem; font-weight: 700; color: #198754;">—</div>
+								</div>
+								<div>
+									<div style="font-size: 0.75rem; color: var(--bs-gray-600);">Среднее</div>
+									<div id="statsAvg" style="font-size: 1.5rem; font-weight: 700;">—</div>
+								</div>
+								<div>
+									<div style="font-size: 0.75rem; color: var(--bs-gray-600);">Кол-во товаров</div>
+									<div id="statsItems" style="font-size: 1.5rem; font-weight: 700;">—</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<div class="card">
+						<div class="card-header">
+							<h3 class="card-title">История выбранного автомата</h3>
+						</div>
+						<div class="card-body">
+							<div id="machineLog" style="color: var(--bs-gray-600); text-align: center; padding: 2rem 0;">Выберите автомат для просмотра истории</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+	<script src="/assets/js/tabler.min.js"></script>
+	<script src="/assets/js/app.js"></script>
+
+	<script>
+		// ===== AUTH CHECK =====
+		if (!localStorage.getItem('adminToken')) {
+			window.location.href = '/login.html';
+		}
+
+		// Logout button
+		document.getElementById('logoutBtn').addEventListener('click', () => {
+			localStorage.removeItem('adminToken');
+			window.location.href = '/login.html';
+		});
+
+		// ===== LOGGING =====
+		const log = (msg, data) => {
+			const timestamp = new Date().toLocaleTimeString('ru-RU');
+			if (data) {
+				console.log(`[${timestamp}] ${msg}`, data);
+			} else {
+				console.log(`[${timestamp}] ${msg}`);
+			}
+		};
+
+		// Simple theme state
+		let currentTheme = 'light';
+
+		function initTheme() {
+			currentTheme = 'light';
+			log(`🎨 Theme initialized to: light`);
+			updateThemeIcon(currentTheme);
+			applyThemeStyles(currentTheme);
+		}
+
+		function updateThemeIcon(theme) {
+			const sunIcon = document.getElementById('sun-icon');
+			const moonIcon = document.getElementById('moon-icon');
+			if (theme === 'dark') {
+				sunIcon.style.display = 'inline';
+				moonIcon.style.display = 'none';
+			} else {
+				sunIcon.style.display = 'none';
+				moonIcon.style.display = 'inline';
+			}
+		}
+
+		function applyThemeStyles(theme) {
+			log(`🎨 applyThemeStyles called with theme: ${theme}`);
+			if (theme === 'dark') {
+				log('  Applying dark theme styles');
+				document.body.style.background = '#1a1a1a';
+				document.body.style.color = '#e0e0e0';
+				document.querySelectorAll('.card').forEach(el => {
+					el.style.backgroundColor = '#242424';
+					el.style.borderColor = '#404040';
+					el.style.color = '#e0e0e0';
+					el.style.backdropFilter = 'none';
+				});
+				document.querySelectorAll('.card-header').forEach(el => {
+					el.style.backgroundColor = '#1f1f1f';
+					el.style.borderColor = '#404040';
+					el.style.color = '#e0e0e0';
+				});
+				document.querySelectorAll('.card-title').forEach(el => {
+					el.style.color = '#e0e0e0';
+				});
+				document.querySelectorAll('.stat-value').forEach(el => {
+					el.style.color = '#ffffff';
+				});
+				document.querySelectorAll('.stat-label').forEach(el => {
+					el.style.color = '#a0a0a0';
+				});
+				document.querySelectorAll('.form-select, .form-control').forEach(el => {
+					el.style.backgroundColor = '#1f1f1f';
+					el.style.borderColor = '#404040';
+					el.style.color = '#e0e0e0';
+				});
+				document.querySelectorAll('.form-label').forEach(el => {
+					el.style.color = '#e0e0e0';
+				});
+				document.querySelectorAll('.table').forEach(el => {
+					el.style.color = '#e0e0e0';
+					el.style.borderColor = '#303030';
+				});
+				document.querySelectorAll('.table th').forEach(el => {
+					el.style.backgroundColor = '#1f1f1f';
+					el.style.color = '#e0e0e0';
+					el.style.borderColor = '#303030';
+					el.style.fontWeight = '600';
+				});
+				document.querySelectorAll('.table td').forEach(el => {
+					el.style.borderColor = '#303030';
+					el.style.color = '#e0e0e0';
+				});
+				document.querySelectorAll('.list-time').forEach(el => {
+					el.style.color = '#ffffff';
+				});
+				document.querySelectorAll('.list-details').forEach(el => {
+					el.style.color = '#a0a0a0';
+				});
+				document.querySelectorAll('h2, h3, h4, h5, h6').forEach(el => {
+					el.style.color = '#e0e0e0';
+				});
+				document.querySelectorAll('.text-muted').forEach(el => {
+					el.style.color = '#a0a0a0 !important';
+				});
+			} else {
+				log('  Applying light theme styles');
+				document.body.style.background = '#ffffff';
+				document.body.style.color = '#212529';
+				document.querySelectorAll('.card').forEach(el => {
+					el.style.backgroundColor = '#ffffff';
+					el.style.borderColor = '#e9ecef';
+					el.style.color = '#212529';
+					el.style.backdropFilter = 'none';
+				});
+				document.querySelectorAll('.card-header').forEach(el => {
+					el.style.backgroundColor = '#f8f9fa';
+					el.style.borderColor = '#e9ecef';
+					el.style.color = '#212529';
+				});
+				document.querySelectorAll('.card-title').forEach(el => {
+					el.style.color = '#212529';
+				});
+				document.querySelectorAll('.stat-value').forEach(el => {
+					el.style.color = '#212529';
+				});
+				document.querySelectorAll('.stat-label').forEach(el => {
+					el.style.color = '#6c757d';
+				});
+				document.querySelectorAll('.form-select, .form-control').forEach(el => {
+					el.style.backgroundColor = '#ffffff';
+					el.style.borderColor = '#dee2e6';
+					el.style.color = '#212529';
+				});
+				document.querySelectorAll('.form-label').forEach(el => {
+					el.style.color = '#212529';
+				});
+				document.querySelectorAll('.table').forEach(el => {
+					el.style.color = '#212529';
+					el.style.borderColor = '#dee2e6';
+				});
+				document.querySelectorAll('.table th').forEach(el => {
+					el.style.backgroundColor = '#f8f9fa';
+					el.style.color = '#212529';
+					el.style.borderColor = '#dee2e6';
+					el.style.fontWeight = '600';
+				});
+				document.querySelectorAll('.table td').forEach(el => {
+					el.style.borderColor = '#dee2e6';
+					el.style.color = '#212529';
+				});
+				document.querySelectorAll('.list-time').forEach(el => {
+					el.style.color = '#212529';
+				});
+				document.querySelectorAll('.list-details').forEach(el => {
+					el.style.color = '#6c757d';
+				});
+				document.querySelectorAll('h2, h3, h4, h5, h6').forEach(el => {
+					el.style.color = '#212529';
+				});
+				document.querySelectorAll('.text-muted').forEach(el => {
+					el.style.color = '#6c757d !important';
+				});
+			}
+		}
+
+		function updateChartsForTheme(theme) {
+			if (!state.charts.revenue || !state.charts.collections) return;
+			log(`📊 Updating charts for theme: ${theme}`);
+
+			const textColor = theme === 'dark' ? '#e0e0e0' : '#212529';
+			const gridColor = theme === 'dark' ? 'rgba(64, 64, 64, 0.3)' : 'rgba(0, 0, 0, 0.05)';
+
+			// Revenue chart
+			if (state.charts.revenue.options.scales) {
+				state.charts.revenue.options.scales.x.ticks.color = textColor;
+				state.charts.revenue.options.scales.y.ticks.color = textColor;
+				state.charts.revenue.options.scales.x.grid.color = gridColor;
+				state.charts.revenue.options.scales.y.grid.color = gridColor;
+			}
+			state.charts.revenue.update('none');
+
+			// Collections chart
+			if (state.charts.collections.options.scales) {
+				state.charts.collections.options.scales.x.ticks.color = textColor;
+				state.charts.collections.options.scales.y.ticks.color = textColor;
+				state.charts.collections.options.scales.x.grid.color = gridColor;
+				state.charts.collections.options.scales.y.grid.color = gridColor;
+			}
+			state.charts.collections.update('none');
+		}
+
+		function toggleTheme() {
+			currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+			log(`🌓 Theme toggled to: ${currentTheme}`);
+			updateThemeIcon(currentTheme);
+			applyThemeStyles(currentTheme);
+			updateChartsForTheme(currentTheme);
+		}
+
+		// Application state
+		const state = {
+			city: 'odesa',
+			pointId: 'all',
+			machineId: 'all',
+			days: 7,
+			interval: 'day',
+			collectionsMode: 'revenue',
+			graphGrouping: 'all',
+			allPoints: [],
+			allMachines: [],
+			allCollections: [],
+			charts: {}
+		};
+
+		// API communication
+		async function fetchJson(url) {
+			try {
+				log(`Fetch: ${url}`);
+				const response = await fetch(url);
+				if (!response.ok) {
+					throw new Error(`HTTP ${response.status}`);
+				}
+				const data = await response.json();
+				log(`Fetched ${url}: ${data.length || 1} items`);
+				return data;
+			} catch (e) {
+				log(`Fetch error: ${url}`, e.message);
+				return [];
+			}
+		}
+
+		// Initialization
+		async function init() {
+			try {
+				log('🚀 Init started');
+				initTheme();
+
+				log('📥 Loading data from API...');
+				state.allPoints = await fetchJson('/api/points');
+				log('Points loaded:', state.allPoints);
+				
+				state.allMachines = await fetchJson('/api/machines');
+				log('Machines loaded:', state.allMachines);
+				
+				state.allCollections = await fetchJson('/api/collections');
+				log(`Collections loaded: ${state.allCollections.length} items`);
+				log('Sample collection:', state.allCollections[0]);
+
+				if (!Array.isArray(state.allPoints)) state.allPoints = [];
+				if (!Array.isArray(state.allMachines)) state.allMachines = [];
+				if (!Array.isArray(state.allCollections)) state.allCollections = [];
+
+				populatePointSelect();
+				updateMachineSelect();
+				setupCharts();
+				updateChartsForTheme(currentTheme);
+				setupEventListeners();
+				await updateDashboard();
+
+				log('✅ Init completed');
+				setInterval(updateDashboard, 30000);
+			} catch (error) {
+				log('❌ Init error', error);
+			}
+		}
+
+		function populatePointSelect() {
+			log('📍 Populating point select');
+			const pointSelect = document.getElementById('pointSelect');
+			pointSelect.innerHTML = '<option value="all">Все точки</option>';
+			
+			state.allPoints.forEach(point => {
+				log(`  Adding point: ${point.id} = ${point.name}`);
+				const option = document.createElement('option');
+				option.value = point.id;
+				option.textContent = point.name;
+				pointSelect.appendChild(option);
+			});
+
+			document.getElementById('pointsTotal').textContent = state.allPoints.length;
+			document.getElementById('machinesTotal').textContent = state.allMachines.length;
+		}
+
+		function updateMachineSelect() {
+			log(`🔄 updateMachineSelect called, state.pointId = ${state.pointId}`);
+			const machineSelect = document.getElementById('machineSelect');
+			const pointId = state.pointId;
+			
+			// Фильтруем автоматы по выбранной точке
+			let filteredMachines;
+			if (pointId === 'all') {
+				filteredMachines = state.allMachines;
+				log(`Point is 'all', showing all machines (${filteredMachines.length})`);
+			} else {
+				filteredMachines = state.allMachines.filter(m => String(m.point_id) === String(pointId));
+				log(`Point is ${pointId}, filtered machines:`, filteredMachines);
+			}
+
+			// Перестраиваем селект
+			machineSelect.innerHTML = '<option value="all">Все автоматы</option>';
+			filteredMachines.forEach(machine => {
+				log(`  Adding machine: ${machine.id} = ${machine.name} (point_id: ${machine.point_id})`);
+				const option = document.createElement('option');
+				option.value = machine.id;
+				option.textContent = machine.name;
+				machineSelect.appendChild(option);
+			});
+
+			// Если был выбран автомат, который не входит в отфильтрованный список, сбрасываем
+			const currentValue = state.machineId;
+			if (currentValue !== 'all' && !filteredMachines.find(m => String(m.id) === String(currentValue))) {
+				state.machineId = 'all';
+				machineSelect.value = 'all';
+			} else {
+				machineSelect.value = state.machineId;
+			}
+		}
+
+		function setupCharts() {
+			const chartConfig = {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { display: false },
+					filler: { propagate: true }
+				},
+				interaction: { intersect: false, mode: 'index' },
+				scales: {
+					x: {
+						grid: { color: 'rgba(0, 0, 0, 0.05)' },
+						ticks: { color: 'var(--bs-gray-600)', font: { size: 12 } }
+					},
+					y: {
+						grid: { color: 'rgba(0, 0, 0, 0.05)' },
+						ticks: { color: 'var(--bs-gray-600)', font: { size: 12 } }
+					}
+				}
+			};
+
+			const barChartConfig = {
+				...chartConfig,
+				layout: {
+					padding: {
+						left: 20,
+						right: 20,
+						top: 0,
+						bottom: 0
+					}
+				}
+			};
+
+			const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+			state.charts.revenue = new Chart(revenueCtx, {
+				type: 'line',
+				data: {
+					labels: [],
+					datasets: [{
+						label: 'Выручка (₴)',
+						data: [],
+						borderColor: '#066fd1',
+						backgroundColor: 'rgba(6, 111, 209, 0.15)',
+						borderWidth: 3,
+						fill: true,
+						pointRadius: 5,
+						pointBackgroundColor: '#066fd1',
+						pointBorderColor: '#ffffff',
+						pointBorderWidth: 2,
+						pointHoverRadius: 7,
+						tension: 0.3
+					}]
+				},
+				options: chartConfig
+			});
+
+			const collectionsCtx = document.getElementById('collectionsChart').getContext('2d');
+			state.charts.collections = new Chart(collectionsCtx, {
+				type: 'bar',
+				data: {
+					labels: [],
+					datasets: [{
+						label: 'Инкассации',
+						data: [],
+						backgroundColor: '#0dcaf0',
+						borderColor: '#0dcaf0',
+						borderWidth: 0,
+						borderRadius: 6
+					}]
+				},
+				options: barChartConfig
+			});
+			log('📊 Charts initialized');
+		}
+
+		function setupEventListeners() {
+			log('🎯 Setting up event listeners');
+
+			// Theme toggle
+			const themeBtn = document.getElementById('theme-toggle');
+			if (themeBtn) {
+				log('✓ Theme toggle button found');
+				themeBtn.addEventListener('click', (e) => {
+					log('🌓 Theme toggle clicked');
+					toggleTheme();
+				});
+			} else {
+				log('❌ Theme toggle button NOT found');
+			}
+
+			document.getElementById('pointSelect').addEventListener('change', (e) => {
+				log(`Point changed to: ${e.target.value}`);
+				state.pointId = e.target.value;
+				state.machineId = 'all';
+				updateMachineSelect();
+				updateDashboard();
+			});
+
+			document.getElementById('machineSelect').addEventListener('change', (e) => {
+				log(`Machine changed to: ${e.target.value}`);
+				state.machineId = e.target.value;
+				updateDashboard();
+			});
+
+			document.getElementById('intervalSelect').addEventListener('change', (e) => {
+				log(`Interval changed to: ${e.target.value}`);
+				state.interval = e.target.value;
+				updateDashboard();
+			});
+
+			document.querySelectorAll('[data-days]').forEach(btn => {
+				btn.addEventListener('click', () => {
+					document.querySelectorAll('[data-days]').forEach(b => {
+						b.classList.remove('btn-primary');
+						b.classList.add('btn-outline-primary');
+					});
+					btn.classList.remove('btn-outline-primary');
+					btn.classList.add('btn-primary');
+					const days = Number(btn.dataset.days);
+					state.days = days;
+					log(`Days changed to: ${days}`);
+
+					// Обновляем date input'ы
+					const today = new Date();
+					const pastDate = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+					document.getElementById('dateTo').valueAsDate = today;
+					document.getElementById('dateFrom').valueAsDate = pastDate;
+
+					updateDashboard();
+				});
+			});
+
+			// Collections mode toggle
+			document.getElementById('collectionsModeRevenue').addEventListener('click', () => {
+				state.collectionsMode = 'revenue';
+				document.getElementById('collectionsModeRevenue').classList.remove('btn-outline-primary');
+				document.getElementById('collectionsModeRevenue').classList.add('btn-primary');
+				document.getElementById('collectionsModeCounts').classList.remove('btn-primary');
+				document.getElementById('collectionsModeCounts').classList.add('btn-outline-primary');
+				updateDashboard();
+			});
+
+			document.getElementById('collectionsModeCounts').addEventListener('click', () => {
+				state.collectionsMode = 'counts';
+				document.getElementById('collectionsModeCounts').classList.remove('btn-outline-primary');
+				document.getElementById('collectionsModeCounts').classList.add('btn-primary');
+				document.getElementById('collectionsModeRevenue').classList.remove('btn-primary');
+				document.getElementById('collectionsModeRevenue').classList.add('btn-outline-primary');
+				updateDashboard();
+			});
+
+			// Date range filters
+			const today = new Date();
+			const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+			document.getElementById('dateTo').valueAsDate = today;
+			document.getElementById('dateFrom').valueAsDate = sevenDaysAgo;
+
+			document.getElementById('dateFrom').addEventListener('change', () => {
+				log(`Date from changed to: ${document.getElementById('dateFrom').value}`);
+				updateDashboard();
+			});
+
+			document.getElementById('dateTo').addEventListener('change', () => {
+				log(`Date to changed to: ${document.getElementById('dateTo').value}`);
+				updateDashboard();
+			});
+
+			// Date range modal handlers
+			document.getElementById('openDateRangeModal').addEventListener('click', () => {
+				document.getElementById('modalDateFrom').value = document.getElementById('dateFrom').value;
+				document.getElementById('modalDateTo').value = document.getElementById('dateTo').value;
+				document.getElementById('dateRangeModal').style.display = 'flex';
+			});
+
+			document.getElementById('closeDateModal').addEventListener('click', () => {
+				document.getElementById('dateRangeModal').style.display = 'none';
+			});
+
+			document.getElementById('applyDateRange').addEventListener('click', () => {
+				document.getElementById('dateFrom').value = document.getElementById('modalDateFrom').value;
+				document.getElementById('dateTo').value = document.getElementById('modalDateTo').value;
+				document.getElementById('dateRangeModal').style.display = 'none';
+				updateDashboard();
+			});
+
+			// Close modal on outside click
+			document.getElementById('dateRangeModal').addEventListener('click', (e) => {
+				if (e.target.id === 'dateRangeModal') {
+					document.getElementById('dateRangeModal').style.display = 'none';
+				}
+			});
+
+			// Graph grouping toggle
+			document.getElementById('groupAll').addEventListener('click', () => {
+				state.graphGrouping = 'all';
+				document.getElementById('groupAll').classList.remove('btn-outline-primary');
+				document.getElementById('groupAll').classList.add('btn-primary');
+				document.getElementById('groupPoints').classList.remove('btn-primary');
+				document.getElementById('groupPoints').classList.add('btn-outline-primary');
+				document.getElementById('groupMachines').classList.remove('btn-primary');
+				document.getElementById('groupMachines').classList.add('btn-outline-primary');
+				updateDashboard();
+			});
+
+			document.getElementById('groupPoints').addEventListener('click', () => {
+				state.graphGrouping = 'points';
+				document.getElementById('groupPoints').classList.remove('btn-outline-primary');
+				document.getElementById('groupPoints').classList.add('btn-primary');
+				document.getElementById('groupAll').classList.remove('btn-primary');
+				document.getElementById('groupAll').classList.add('btn-outline-primary');
+				document.getElementById('groupMachines').classList.remove('btn-primary');
+				document.getElementById('groupMachines').classList.add('btn-outline-primary');
+				updateDashboard();
+			});
+
+			document.getElementById('groupMachines').addEventListener('click', () => {
+				state.graphGrouping = 'machines';
+				document.getElementById('groupMachines').classList.remove('btn-outline-primary');
+				document.getElementById('groupMachines').classList.add('btn-primary');
+				document.getElementById('groupAll').classList.remove('btn-primary');
+				document.getElementById('groupAll').classList.add('btn-outline-primary');
+				document.getElementById('groupPoints').classList.remove('btn-primary');
+				document.getElementById('groupPoints').classList.add('btn-outline-primary');
+				updateDashboard();
+			});
+		}
+
+		function filterData() {
+			log(`Filtering: pointId=${state.pointId}, machineId=${state.machineId}`);
+			
+			const dateFromStr = document.getElementById('dateFrom').value;
+			const dateToStr = document.getElementById('dateTo').value;
+			const dateFrom = dateFromStr ? new Date(dateFromStr) : new Date();
+			const dateTo = dateToStr ? new Date(dateToStr) : new Date();
+			dateTo.setHours(23, 59, 59, 999);
+
+			const filtered = state.allCollections.filter(item => {
+				// Фильтруем по выбранному автомату (по ID)
+				if (state.machineId !== 'all') {
+					return String(item.machine_id) === String(state.machineId);
+				}
+
+				// Если точка выбрана, фильтруем по автоматам этой точки
+				if (state.pointId !== 'all') {
+					const machinesForPoint = state.allMachines
+						.filter(m => String(m.point_id) === String(state.pointId))
+						.map(m => m.id);
+					return machinesForPoint.includes(item.machine_id);
+				}
+
+				// Иначе показываем все
+				return true;
+			}).filter(item => {
+				// Фильтруем по периоду дат
+				const itemDate = new Date(item.created_at);
+				return itemDate >= dateFrom && itemDate <= dateTo;
+			});
+
+			log(`Filtered ${filtered.length} records from ${state.allCollections.length} total`);
+			return filtered;
+		}
+
+		function aggregateByInterval(items) {
+			if (state.graphGrouping === 'all') {
+				// Текущая логика - агрегация по дате без группировки
+				const map = {};
+				items.forEach(item => {
+					const date = new Date(item.created_at);
+					let key;
+					if (state.interval === 'day') {
+						key = date.toISOString().split('T')[0];
+					} else if (state.interval === 'week') {
+						const d = new Date(date);
+						const weekStart = new Date(d.setDate(d.getDate() - d.getDay()));
+						key = weekStart.toISOString().split('T')[0];
+					} else {
+						key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+					}
+
+					if (!map[key]) {
+						map[key] = { revenue: 0, items: 0, date: new Date(key) };
+					}
+					map[key].revenue += Number(item.amount || 0);
+					map[key].items += Number(item.quantity || 0);
+				});
+
+				return Object.entries(map)
+					.map(([key, val]) => ({ ...val, key }))
+					.sort((a, b) => a.date - b.date);
+			} else if (state.graphGrouping === 'points') {
+				// Группировка по точкам
+				const map = {};
+				items.forEach(item => {
+					const date = new Date(item.created_at);
+					let dateKey;
+					if (state.interval === 'day') {
+						dateKey = date.toISOString().split('T')[0];
+					} else if (state.interval === 'week') {
+						const d = new Date(date);
+						const weekStart = new Date(d.setDate(d.getDate() - d.getDay()));
+						dateKey = weekStart.toISOString().split('T')[0];
+					} else {
+						dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+					}
+
+					const key = `${dateKey}|${item.point_name}`;
+					if (!map[key]) {
+						map[key] = { date: new Date(dateKey), dateKey, point: item.point_name, revenue: 0, items: 0 };
+					}
+					map[key].revenue += Number(item.amount || 0);
+					map[key].items += Number(item.quantity || 0);
+				});
+
+				return Object.values(map).sort((a, b) => a.date - b.date);
+			} else {
+				// Группировка по автоматам
+				const map = {};
+				items.forEach(item => {
+					const date = new Date(item.created_at);
+					let dateKey;
+					if (state.interval === 'day') {
+						dateKey = date.toISOString().split('T')[0];
+					} else if (state.interval === 'week') {
+						const d = new Date(date);
+						const weekStart = new Date(d.setDate(d.getDate() - d.getDay()));
+						dateKey = weekStart.toISOString().split('T')[0];
+					} else {
+						dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+					}
+
+					const key = `${dateKey}|${item.machine_name}`;
+					if (!map[key]) {
+						map[key] = { date: new Date(dateKey), dateKey, machine: item.machine_name, revenue: 0, items: 0 };
+					}
+					map[key].revenue += Number(item.amount || 0);
+					map[key].items += Number(item.quantity || 0);
+				});
+
+				return Object.values(map).sort((a, b) => a.date - b.date);
+			}
+		}
+
+		function formatLabel(dateStr, interval) {
+			const date = new Date(dateStr);
+			if (interval === 'day') {
+				return date.toLocaleDateString('ru-RU', { month: '2-digit', day: '2-digit' });
+			} else if (interval === 'week') {
+				const end = new Date(date);
+				end.setDate(end.getDate() + 6);
+				return `${date.getDate()}.${date.getMonth() + 1} - ${end.getDate()}.${end.getMonth() + 1}`;
+			} else {
+				return date.toLocaleDateString('ru-RU', { month: 'long', year: '2-digit' });
+			}
+		}
+
+		function getScaleRange(data) {
+			if (!data || data.length === 0) return { min: 0, max: 100 };
+			const min = Math.min(...data);
+			const max = Math.max(...data);
+			const range = max - min;
+			const padding = range * 0.15;
+			let scaledMin = Math.max(0, min - padding);
+			let scaledMax = max + padding;
+
+			// Round to nearest 1000
+			scaledMin = Math.floor(scaledMin / 1000) * 1000;
+			scaledMax = Math.ceil(scaledMax / 1000) * 1000;
+
+			return { min: scaledMin, max: scaledMax };
+		}
+
+		const colors = [
+			'#066fd1', '#0dcaf0', '#198754', '#ffc107', '#fd7e14', '#d1293d',
+			'#6f42c1', '#20c997', '#e83e8c', '#6c757d', '#0d6efd', '#31b0d5'
+		];
+
+		function getColor(index) {
+			return colors[index % colors.length];
+		}
+
+		function renderLegend(datasets, containerId) {
+			const container = document.getElementById(containerId);
+			if (!datasets || datasets.length === 0) {
+				container.innerHTML = '';
+				return;
+			}
+
+			container.innerHTML = datasets.map(ds => `
+				<div style="display: flex; align-items: center; gap: 0.5rem;">
+					<div style="width: 16px; height: 16px; background-color: ${ds.borderColor || ds.backgroundColor}; border-radius: 2px;"></div>
+					<span style="font-size: 0.9rem;">${ds.label}</span>
+				</div>
+			`).join('');
+		}
+
+		async function updateDashboard() {
+			log('🔄 updateDashboard called');
+			const filtered = filterData();
+			const totalRevenue = filtered.reduce((s, i) => s + Number(i.amount || 0), 0);
+
+			log(`Total revenue: ${totalRevenue}, Collections: ${filtered.length}`);
+			document.getElementById('totalRevenue').textContent = `${totalRevenue.toLocaleString('ru-RU')} ₴`;
+			document.getElementById('collectionsTotal').textContent = filtered.length;
+
+			const aggregated = aggregateByInterval(filtered);
+			log(`Aggregated into ${aggregated.length} periods`);
+			
+			if (state.graphGrouping === 'all') {
+				// Один датасет для всех данных
+				const labels = aggregated.map(d => formatLabel(d.key || d.dateKey, state.interval));
+				const revenueData = aggregated.map(d => d.revenue);
+
+				state.charts.revenue.data.labels = labels;
+				state.charts.revenue.data.datasets = [{
+					label: 'Выручка (₴)',
+					data: revenueData,
+					borderColor: '#066fd1',
+					backgroundColor: 'rgba(6, 111, 209, 0.15)',
+					borderWidth: 3,
+					fill: true,
+					pointRadius: 5,
+					pointBackgroundColor: '#066fd1',
+					pointBorderColor: '#ffffff',
+					pointBorderWidth: 2,
+					pointHoverRadius: 7,
+					tension: 0.3
+				}];
+
+				const revenueRange = getScaleRange(revenueData);
+				state.charts.revenue.options.scales.y.min = revenueRange.min;
+				state.charts.revenue.options.scales.y.max = revenueRange.max;
+				renderLegend(state.charts.revenue.data.datasets, 'revenueLegend');
+			} else if (state.graphGrouping === 'points') {
+				// Датасеты по точкам
+				const points = [...new Set(aggregated.map(d => d.point))];
+				const labels = [...new Set(aggregated.map(d => d.dateKey))].sort().map(k => formatLabel(k, state.interval));
+
+				const datasets = points.map((point, idx) => {
+					const pointData = aggregated.filter(d => d.point === point).sort((a, b) => new Date(a.dateKey) - new Date(b.dateKey));
+					const dataMap = {};
+					pointData.forEach(d => { dataMap[d.dateKey] = d.revenue; });
+
+					const data = [...new Set(aggregated.map(d => d.dateKey))].sort().map(k => dataMap[k] || 0);
+					const color = getColor(idx);
+
+					return {
+						label: point,
+						data: data,
+						borderColor: color,
+						backgroundColor: color + '26',
+						borderWidth: 2,
+						fill: false,
+						pointRadius: 4,
+						pointBackgroundColor: color,
+						pointBorderColor: '#ffffff',
+						pointBorderWidth: 2,
+						tension: 0.3
+					};
+				});
+
+				state.charts.revenue.data.labels = labels;
+				state.charts.revenue.data.datasets = datasets;
+
+				const allData = aggregated.map(d => d.revenue);
+				const revenueRange = getScaleRange(allData);
+				state.charts.revenue.options.scales.y.min = revenueRange.min;
+				state.charts.revenue.options.scales.y.max = revenueRange.max;
+				renderLegend(state.charts.revenue.data.datasets, 'revenueLegend');
+			} else {
+				// Датасеты по автоматам
+				const machines = [...new Set(aggregated.map(d => d.machine))];
+				const labels = [...new Set(aggregated.map(d => d.dateKey))].sort().map(k => formatLabel(k, state.interval));
+
+				const datasets = machines.map((machine, idx) => {
+					const machineData = aggregated.filter(d => d.machine === machine).sort((a, b) => new Date(a.dateKey) - new Date(b.dateKey));
+					const dataMap = {};
+					machineData.forEach(d => { dataMap[d.dateKey] = d.revenue; });
+
+					const data = [...new Set(aggregated.map(d => d.dateKey))].sort().map(k => dataMap[k] || 0);
+					const color = getColor(idx);
+
+					return {
+						label: machine,
+						data: data,
+						borderColor: color,
+						backgroundColor: color + '26',
+						borderWidth: 2,
+						fill: false,
+						pointRadius: 4,
+						pointBackgroundColor: color,
+						pointBorderColor: '#ffffff',
+						pointBorderWidth: 2,
+						tension: 0.3
+					};
+				});
+
+				state.charts.revenue.data.labels = labels;
+				state.charts.revenue.data.datasets = datasets;
+
+				const allData = aggregated.map(d => d.revenue);
+				const revenueRange = getScaleRange(allData);
+				state.charts.revenue.options.scales.y.min = revenueRange.min;
+				state.charts.revenue.options.scales.y.max = revenueRange.max;
+				renderLegend(state.charts.revenue.data.datasets, 'revenueLegend');
+			}
+			state.charts.revenue.update();
+
+			if (state.graphGrouping === 'all') {
+				// Один датасет для всех данных
+				const labels = aggregated.map(d => formatLabel(d.key || d.dateKey, state.interval));
+				let collectionsData;
+				let label;
+				if (state.collectionsMode === 'revenue') {
+					collectionsData = aggregated.map(d => d.revenue);
+					label = 'Выручка (₴)';
+				} else {
+					collectionsData = aggregated.map(d => d.items);
+					label = 'Количество товаров';
+				}
+
+				state.charts.collections.data.labels = labels;
+				state.charts.collections.data.datasets = [{
+					label: label,
+					data: collectionsData,
+					backgroundColor: '#0dcaf0',
+					borderColor: '#0dcaf0',
+					borderWidth: 0,
+					borderRadius: 6
+				}];
+
+				const collectionsRange = getScaleRange(collectionsData);
+				state.charts.collections.options.scales.y.min = collectionsRange.min;
+				state.charts.collections.options.scales.y.max = collectionsRange.max;
+			} else if (state.graphGrouping === 'points') {
+				// Датасеты по точкам
+				const points = [...new Set(aggregated.map(d => d.point))];
+				const labels = [...new Set(aggregated.map(d => d.dateKey))].sort().map(k => formatLabel(k, state.interval));
+
+				const datasets = points.map((point, idx) => {
+					const pointData = aggregated.filter(d => d.point === point).sort((a, b) => new Date(a.dateKey) - new Date(b.dateKey));
+					const dataMap = {};
+					pointData.forEach(d => { dataMap[d.dateKey] = state.collectionsMode === 'revenue' ? d.revenue : d.items; });
+
+					const data = [...new Set(aggregated.map(d => d.dateKey))].sort().map(k => dataMap[k] || 0);
+					const color = getColor(idx);
+
+					return {
+						label: point,
+						data: data,
+						backgroundColor: color,
+						borderColor: color,
+						borderWidth: 0,
+						borderRadius: 4
+					};
+				});
+
+				state.charts.collections.data.labels = labels;
+				state.charts.collections.data.datasets = datasets;
+
+				const allData = aggregated.map(d => state.collectionsMode === 'revenue' ? d.revenue : d.items);
+				const collectionsRange = getScaleRange(allData);
+				state.charts.collections.options.scales.y.min = collectionsRange.min;
+				state.charts.collections.options.scales.y.max = collectionsRange.max;
+			} else {
+				// Датасеты по автоматам
+				const machines = [...new Set(aggregated.map(d => d.machine))];
+				const labels = [...new Set(aggregated.map(d => d.dateKey))].sort().map(k => formatLabel(k, state.interval));
+
+				const datasets = machines.map((machine, idx) => {
+					const machineData = aggregated.filter(d => d.machine === machine).sort((a, b) => new Date(a.dateKey) - new Date(b.dateKey));
+					const dataMap = {};
+					machineData.forEach(d => { dataMap[d.dateKey] = state.collectionsMode === 'revenue' ? d.revenue : d.items; });
+
+					const data = [...new Set(aggregated.map(d => d.dateKey))].sort().map(k => dataMap[k] || 0);
+					const color = getColor(idx);
+
+					return {
+						label: machine,
+						data: data,
+						backgroundColor: color,
+						borderColor: color,
+						borderWidth: 0,
+						borderRadius: 4
+					};
+				});
+
+				state.charts.collections.data.labels = labels;
+				state.charts.collections.data.datasets = datasets;
+
+				const allData = aggregated.map(d => state.collectionsMode === 'revenue' ? d.revenue : d.items);
+				const collectionsRange = getScaleRange(allData);
+				state.charts.collections.options.scales.y.min = collectionsRange.min;
+				state.charts.collections.options.scales.y.max = collectionsRange.max;
+			}
+			state.charts.collections.update();
+
+			// Summary table
+			if (filtered.length === 0) {
+				log('No data for summary table');
+				document.getElementById('summaryTable').innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--bs-gray-600);">Нет данных</td></tr>';
+			} else {
+				const grouped = {};
+				filtered.forEach(item => {
+					const key = `${item.point_name}|${item.machine_name}`;
+					if (!grouped[key]) {
+						grouped[key] = {
+							point: item.point_name,
+							machine: item.machine_name,
+							collections: 0,
+							revenue: 0,
+							items: 0
+						};
+					}
+					grouped[key].collections += 1;
+					grouped[key].revenue += Number(item.amount || 0);
+					grouped[key].items += Number(item.quantity || 0);
+				});
+
+				log(`Grouped into ${Object.keys(grouped).length} rows`);
+				document.getElementById('summaryTable').innerHTML = Object.values(grouped)
+					.sort((a, b) => b.revenue - a.revenue)
+					.map(g => `
+						<tr>
+							<td>${g.point}</td>
+							<td>${g.machine}</td>
+							<td>${g.collections}</td>
+							<td>${g.revenue.toLocaleString('ru-RU')} ₴</td>
+							<td>${g.items}</td>
+							<td>${(g.revenue / g.collections).toLocaleString('ru-RU', { maximumFractionDigits: 2 })} ₴</td>
+						</tr>
+					`).join('');
+			}
+
+			// Recent collections with filters
+			const recentPointFilter = document.getElementById('recentPointFilter').value;
+			const recentMachineFilter = document.getElementById('recentMachineFilter').value;
+			const recentCollectorFilter = document.getElementById('recentCollectorFilter').value;
+
+			let recentFiltered = filtered.filter(item => {
+				if (recentPointFilter && String(item.point_id) !== String(recentPointFilter)) return false;
+				if (recentMachineFilter && String(item.machine_id) !== String(recentMachineFilter)) return false;
+				if (recentCollectorFilter && item.collector !== recentCollectorFilter) return false;
+				return true;
+			});
+
+			// Populate filter dropdowns - clear and rebuild
+			const pointFilter = document.getElementById('recentPointFilter');
+			const machineFilter = document.getElementById('recentMachineFilter');
+			const collectorFilter = document.getElementById('recentCollectorFilter');
+
+			// Clear existing options (except first)
+			while (pointFilter.options.length > 1) pointFilter.remove(1);
+			while (machineFilter.options.length > 1) machineFilter.remove(1);
+			while (collectorFilter.options.length > 1) collectorFilter.remove(1);
+
+			// Use state.allPoints, state.allMachines for unique values instead of collections
+			const uniquePoints = [...new Set(state.allMachines.map(m => m.point_id))];
+			const uniqueMachines = [...new Set(state.allCollections.map(c => c.machine_id))];
+			const uniqueCollectors = [...new Set(state.allCollections.map(c => c.collector))];
+
+			log(`Found ${uniquePoints.length} points, ${uniqueMachines.length} machines, ${uniqueCollectors.length} collectors`);
+
+			uniquePoints.sort((a, b) => a - b).forEach(pid => {
+				const point = state.allPoints.find(p => p.id === pid);
+				if (point) {
+					const opt = document.createElement('option');
+					opt.value = pid;
+					opt.textContent = point.name;
+					pointFilter.appendChild(opt);
+					log(`  Added point: ${pid} = ${point.name}`);
+				}
+			});
+
+			uniqueMachines.sort((a, b) => a - b).forEach(mid => {
+				const machine = state.allCollections.find(c => c.machine_id === mid);
+				if (machine) {
+					const opt = document.createElement('option');
+					opt.value = mid;
+					opt.textContent = machine.machine_name;
+					machineFilter.appendChild(opt);
+				}
+			});
+
+			uniqueCollectors.sort().forEach(collector => {
+				const opt = document.createElement('option');
+				opt.value = collector;
+				opt.textContent = collector;
+				collectorFilter.appendChild(opt);
+			});
+
+			log(`✅ Populated filters: ${pointFilter.options.length - 1} points, ${machineFilter.options.length - 1} machines, ${collectorFilter.options.length - 1} collectors`);
+
+			// Debug: log all options in pointFilter
+			log('Points in filter:');
+			for (let i = 0; i < pointFilter.options.length; i++) {
+				log(`  [${i}] value="${pointFilter.options[i].value}" text="${pointFilter.options[i].text}"`);
+			}
+
+			if (recentFiltered.length === 0) {
+				document.getElementById('recentList').innerHTML = '<div style="color: var(--bs-gray-600); text-align: center; padding: 2rem;">Нет инкассаций</div>';
+			} else {
+				const header = `
+					<div style="display: grid; grid-template-columns: 1.2fr 2fr 2fr 1.5fr 1fr; gap: 1rem; padding: 0.75rem; border-bottom: 2px solid var(--bs-border-color); font-weight: 600; font-size: 0.875rem; color: var(--bs-gray-600);">
+						<div>Дата</div>
+						<div>Точка</div>
+						<div>Автомат</div>
+						<div>Инкассатор</div>
+						<div style="text-align: right;">Сумма</div>
+					</div>
+				`;
+				const items = recentFiltered.slice(0, 10).map(item => `
+					<div style="display: grid; grid-template-columns: 1.2fr 2fr 2fr 1.5fr 1fr; gap: 1rem; padding: 0.75rem; border-bottom: 1px solid var(--bs-border-color); align-items: center; font-size: 0.9rem;">
+						<div style="font-weight: 500;">${new Date(item.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' })} ${new Date(item.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
+						<div>${item.point_name}</div>
+						<div>${item.machine_name}</div>
+						<div>${item.collector}</div>
+						<div style="text-align: right; font-weight: 600; color: #198754;">${item.amount} ₴</div>
+					</div>
+				`).join('');
+				document.getElementById('recentList').innerHTML = header + items;
+			}
+
+			// Update statistics for recent collections
+			const recentSum = recentFiltered.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+			const recentItems = recentFiltered.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+			const recentAvg = recentFiltered.length > 0 ? (recentSum / recentFiltered.length).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—';
+
+			document.getElementById('statsCount').textContent = recentFiltered.length;
+			document.getElementById('statsSum').textContent = recentSum.toLocaleString('ru-RU') + ' ₴';
+			document.getElementById('statsAvg').textContent = (recentAvg === '—' ? '—' : recentAvg + ' ₴');
+			document.getElementById('statsItems').textContent = recentItems + ' шт.';
+
+			// Attach filter listeners if not already attached
+			['recentPointFilter', 'recentMachineFilter', 'recentCollectorFilter'].forEach(id => {
+				const elem = document.getElementById(id);
+				if (elem && !elem.dataset.listenerAttached) {
+					elem.addEventListener('change', updateDashboard);
+					elem.dataset.listenerAttached = 'true';
+				}
+			});
+
+			// Machine log
+			if (state.machineId === 'all') {
+				document.getElementById('machineLog').innerHTML = '<div style="color: var(--bs-gray-600);">Выберите конкретный автомат</div>';
+			} else {
+				const items = state.allCollections.filter(i => String(i.machine_id) === String(state.machineId));
+				if (items.length === 0) {
+					document.getElementById('machineLog').innerHTML = '<div style="color: var(--bs-gray-600);">Нет данных по этому автомату</div>';
+				} else {
+					document.getElementById('machineLog').innerHTML = items.slice(0, 10).map(item => `
+						<div class="list-item">
+							<div>
+								<div class="list-time">${new Date(item.created_at).toLocaleString('ru-RU')}</div>
+								<div class="list-details">${item.point_name}</div>
+							</div>
+							<div style="text-align: right;">
+								<div class="list-amount">${item.amount} ₴</div>
+								<div class="list-details">${item.quantity} шт. / ${item.collector}</div>
+							</div>
+						</div>
+					`).join('');
+				}
+			}
+			log('✅ Dashboard updated');
+		}
+
+		// Start application
+		init();
+	</script>
+</body>
+</html>

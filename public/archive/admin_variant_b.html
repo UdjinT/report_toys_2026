@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Report Toys — Детальная Версия B</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg-primary: #0f172a;
+			--bg-secondary: #1e293b;
+			--text-primary: #f1f5f9;
+			--text-secondary: #cbd5e1;
+			--text-tertiary: #94a3b8;
+			--border: #334155;
+			--accent: #8b5cf6;
+			--accent-2: #ec4899;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		html, body {
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+			background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
+			color: var(--text-primary);
+			min-height: 100vh;
+		}
+
+		header {
+			background: rgba(15, 23, 42, 0.95);
+			backdrop-filter: blur(10px);
+			border-bottom: 1px solid var(--border);
+			padding: 1.5rem 2rem;
+		}
+
+		header .container {
+			max-width: 1400px;
+			margin: 0 auto;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 2rem;
+		}
+
+		header h1 {
+			font-size: 1.35rem;
+			font-weight: 700;
+			background: linear-gradient(135deg, #8b5cf6, #ec4899);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		header .subtitle {
+			font-size: 0.9rem;
+			color: var(--text-tertiary);
+			margin-top: 0.25rem;
+		}
+
+		header nav {
+			display: flex;
+			gap: 1rem;
+			flex-wrap: wrap;
+		}
+
+		header a {
+			color: var(--text-secondary);
+			text-decoration: none;
+			padding: 0.6rem 1.2rem;
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 8px;
+			font-size: 0.9rem;
+			transition: all 0.2s;
+		}
+
+		header a:hover {
+			background: rgba(255, 255, 255, 0.1);
+			border-color: rgba(255, 255, 255, 0.2);
+		}
+
+		main {
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: 2.5rem 2rem;
+		}
+
+		.section {
+			margin-bottom: 2.5rem;
+		}
+
+		.section-title {
+			font-size: 1.2rem;
+			font-weight: 700;
+			margin-bottom: 1.5rem;
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+		}
+
+		.section-title::before {
+			content: '';
+			width: 4px;
+			height: 24px;
+			background: linear-gradient(180deg, #8b5cf6, #ec4899);
+			border-radius: 2px;
+		}
+
+		.kpi-grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 1.5rem;
+		}
+
+		.kpi-card {
+			background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.05));
+			border: 1px solid rgba(139, 92, 246, 0.3);
+			border-radius: 12px;
+			padding: 1.75rem;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.kpi-card::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			right: -50%;
+			width: 200px;
+			height: 200px;
+			background: radial-gradient(circle, rgba(139, 92, 246, 0.1), transparent);
+			border-radius: 50%;
+			pointer-events: none;
+		}
+
+		.kpi-content {
+			position: relative;
+			z-index: 1;
+		}
+
+		.kpi-value {
+			font-size: 2.2rem;
+			font-weight: 700;
+			line-height: 1;
+			margin-bottom: 0.5rem;
+			background: linear-gradient(135deg, #8b5cf6, #ec4899);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		.kpi-label {
+			font-size: 0.85rem;
+			color: var(--text-tertiary);
+			font-weight: 500;
+		}
+
+		.card {
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.75rem;
+		}
+
+		.card-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 1.5rem;
+		}
+
+		.card h3 {
+			font-size: 1.1rem;
+			font-weight: 600;
+		}
+
+		.stat-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.5rem 1rem;
+			background: rgba(139, 92, 246, 0.1);
+			border: 1px solid rgba(139, 92, 246, 0.3);
+			color: #c4b5fd;
+			border-radius: 8px;
+			font-size: 0.85rem;
+			font-weight: 500;
+		}
+
+		.controls {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+			gap: 1.5rem;
+		}
+
+		.control-group {
+			display: flex;
+			flex-direction: column;
+			gap: 0.6rem;
+		}
+
+		.control-label {
+			font-size: 0.8rem;
+			font-weight: 700;
+			color: var(--text-tertiary);
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+		}
+
+		select {
+			background: var(--bg-primary);
+			border: 1px solid var(--border);
+			color: var(--text-primary);
+			padding: 0.7rem 1rem;
+			border-radius: 8px;
+			font-family: inherit;
+			font-size: 0.95rem;
+			transition: all 0.2s;
+		}
+
+		select:focus {
+			outline: none;
+			border-color: var(--accent);
+			box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+		}
+
+		.range-buttons {
+			display: flex;
+			gap: 0.5rem;
+			flex-wrap: wrap;
+		}
+
+		.range-btn {
+			background: var(--bg-primary);
+			border: 1px solid var(--border);
+			color: var(--text-secondary);
+			padding: 0.6rem 1rem;
+			border-radius: 8px;
+			cursor: pointer;
+			font-size: 0.9rem;
+			font-weight: 600;
+			transition: all 0.2s;
+		}
+
+		.range-btn:hover {
+			border-color: rgba(139, 92, 246, 0.3);
+		}
+
+		.range-btn.active {
+			background: linear-gradient(135deg, #8b5cf6, #ec4899);
+			border-color: var(--accent);
+			color: white;
+		}
+
+		.grid-charts {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 2rem;
+		}
+
+		.chart-wrapper {
+			position: relative;
+			height: 350px;
+		}
+
+		canvas {
+			max-height: 320px !important;
+		}
+
+		.grid-info {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 1.5rem;
+		}
+
+		.info-card {
+			background: rgba(139, 92, 246, 0.05);
+			border: 1px solid rgba(139, 92, 246, 0.2);
+			border-radius: 10px;
+			padding: 1.25rem;
+		}
+
+		.info-label {
+			font-size: 0.8rem;
+			color: var(--text-tertiary);
+			font-weight: 600;
+			margin-bottom: 0.5rem;
+		}
+
+		.info-value {
+			font-size: 1.25rem;
+			font-weight: 700;
+			color: var(--text-primary);
+		}
+
+		.info-subtext {
+			font-size: 0.85rem;
+			color: var(--text-tertiary);
+			margin-top: 0.5rem;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 1.5rem;
+		}
+
+		thead {
+			background: rgba(139, 92, 246, 0.08);
+		}
+
+		th {
+			padding: 1rem;
+			text-align: left;
+			font-weight: 700;
+			font-size: 0.85rem;
+			color: var(--text-secondary);
+			border-bottom: 1px solid var(--border);
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		td {
+			padding: 1rem;
+			border-bottom: 1px solid var(--border);
+			color: var(--text-secondary);
+			font-size: 0.95rem;
+		}
+
+		tbody tr:hover {
+			background: rgba(139, 92, 246, 0.05);
+		}
+
+		.grid-bottom {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 2rem;
+		}
+
+		.list-item {
+			padding: 1rem;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+		}
+
+		.list-item:last-child {
+			border-bottom: none;
+		}
+
+		.list-time {
+			color: var(--text-secondary);
+			font-weight: 600;
+			font-size: 0.9rem;
+		}
+
+		.list-details {
+			color: var(--text-tertiary);
+			font-size: 0.85rem;
+			margin-top: 0.25rem;
+		}
+
+		.list-amount {
+			color: #8b5cf6;
+			font-weight: 700;
+			font-size: 1rem;
+		}
+
+		@media (max-width: 1024px) {
+			.grid-charts {
+				grid-template-columns: 1fr;
+			}
+
+			.grid-info {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.grid-bottom {
+				grid-template-columns: 1fr;
+			}
+
+			.kpi-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+
+		@media (max-width: 640px) {
+			main {
+				padding: 1.5rem 1rem;
+			}
+
+			header .container {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 1rem;
+			}
+
+			.kpi-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.grid-info {
+				grid-template-columns: 1fr;
+			}
+
+			.controls {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<div class="container">
+			<div>
+				<h1>Variant B — Детальный Анализ</h1>
+				<div class="subtitle">Полный контроль с расширенной информацией</div>
+			</div>
+			<nav>
+				<a href="/admin.html">Основная</a>
+				<a href="/admin_pro.html">Pro</a>
+				<a href="/admin_variant_a.html">Variant A</a>
+			</nav>
+		</div>
+	</header>
+
+	<main>
+		<!-- KPI Section -->
+		<section class="section">
+			<div class="section-title">Основные метрики</div>
+			<div class="kpi-grid">
+				<div class="kpi-card">
+					<div class="kpi-content">
+						<div class="kpi-value" id="totalAmount">0 ₴</div>
+						<div class="kpi-label">Выручка</div>
+					</div>
+				</div>
+				<div class="kpi-card">
+					<div class="kpi-content">
+						<div class="kpi-value" id="collectionsCount">0</div>
+						<div class="kpi-label">Инкассаций</div>
+					</div>
+				</div>
+				<div class="kpi-card">
+					<div class="kpi-content">
+						<div class="kpi-value" id="pointsCount">0</div>
+						<div class="kpi-label">Точек</div>
+					</div>
+				</div>
+				<div class="kpi-card">
+					<div class="kpi-content">
+						<div class="kpi-value" id="machinesCount">0</div>
+						<div class="kpi-label">Автоматов</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Controls Section -->
+		<section class="section">
+			<div class="section-title">Фильтры и параметры</div>
+			<div class="card">
+				<div class="controls">
+					<div class="control-group">
+						<label class="control-label">Точка</label>
+						<select id="pointSelect"></select>
+					</div>
+					<div class="control-group">
+						<label class="control-label">Автомат</label>
+						<select id="machineSelect"></select>
+					</div>
+					<div class="control-group">
+						<label class="control-label">Интервал</label>
+						<select id="intervalSelect">
+							<option value="day">По дням</option>
+							<option value="week">По неделям</option>
+							<option value="month">По месяцам</option>
+						</select>
+					</div>
+					<div class="control-group">
+						<label class="control-label">Быстрый выбор:</label>
+						<div class="range-buttons">
+							<button class="range-btn active" data-days="7">7 дн.</button>
+							<button class="range-btn" data-days="14">14 дн.</button>
+							<button class="range-btn" data-days="30">30 дн.</button>
+							<button class="range-btn" data-days="90">90 дн.</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Charts Section -->
+		<section class="section">
+			<div class="section-title">Анализ данных</div>
+			<div class="grid-charts">
+				<div class="card">
+					<div class="card-header">
+						<h3>Тренд выручки</h3>
+						<span class="stat-badge">Динамика</span>
+					</div>
+					<div class="chart-wrapper">
+						<canvas id="revenueChart"></canvas>
+					</div>
+				</div>
+				<div class="card">
+					<div class="card-header">
+						<h3>Активность инкассаций</h3>
+						<span class="stat-badge">Граф</span>
+					</div>
+					<div class="chart-wrapper">
+						<canvas id="activityChart"></canvas>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Info Section -->
+		<section class="section">
+			<div class="section-title">Текущее состояние</div>
+			<div class="grid-info">
+				<div class="info-card">
+					<div class="info-label">Выбранная точка</div>
+					<div class="info-value" id="pointName">Все</div>
+					<div class="info-subtext">текущая позиция</div>
+				</div>
+				<div class="info-card">
+					<div class="info-label">Выбранный автомат</div>
+					<div class="info-value" id="machineName">Все</div>
+					<div class="info-subtext">текущая позиция</div>
+				</div>
+				<div class="info-card">
+					<div class="info-label">Период анализа</div>
+					<div class="info-value" id="periodInfo">7</div>
+					<div class="info-subtext">дней</div>
+				</div>
+				<div class="info-card">
+					<div class="info-label">Последнее обновление</div>
+					<div class="info-value" id="lastUpdate" style="font-size: 1rem;">—</div>
+					<div class="info-subtext">время сервера</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Summary Table -->
+		<section class="section">
+			<div class="section-title">Детальная сводка</div>
+			<div class="card">
+				<div class="card-header">
+					<h3>По точкам и автоматам</h3>
+					<span class="stat-badge">Обновляется</span>
+				</div>
+				<div style="overflow-x: auto;">
+					<table>
+						<thead>
+							<tr>
+								<th>Точка</th>
+								<th>Автомат</th>
+								<th>Инкассаций</th>
+								<th>Выручка</th>
+								<th>Товаров</th>
+								<th>Средняя выручка</th>
+							</tr>
+						</thead>
+						<tbody id="summaryTable">
+							<tr>
+								<td colspan="6" style="text-align: center; color: var(--text-tertiary);">Загрузка...</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</section>
+
+		<!-- Recent Activity -->
+		<section class="section">
+			<div class="section-title">Активность</div>
+			<div class="grid-bottom">
+				<div class="card">
+					<div class="card-header">
+						<h3>Последние инкассации</h3>
+						<span class="stat-badge">Свежие</span>
+					</div>
+					<div id="recentArea">Загрузка...</div>
+				</div>
+				<div class="card">
+					<div class="card-header">
+						<h3>История автомата</h3>
+						<span class="stat-badge">Лог</span>
+					</div>
+					<div id="machineLog">Выберите автомат для просмотра</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<script>
+		const state = {
+			pointId: 'all',
+			machineId: 'all',
+			days: 7,
+			interval: 'day',
+			allPoints: [],
+			allMachines: [],
+			allCollections: [],
+			charts: {}
+		};
+
+		function getDemoPoints() {
+			return [
+				{ id: 1, name: 'Точка 1 - Метро' },
+				{ id: 2, name: 'Точка 2 - ТЦ' },
+				{ id: 3, name: 'Точка 3 - Офис' }
+			];
+		}
+
+		function getDemoMachines(pointId = null) {
+			const all = [
+				{ id: 1, name: 'Автомат №1', point_id: 1 },
+				{ id: 2, name: 'Автомат №2', point_id: 1 },
+				{ id: 3, name: 'Автомат №3', point_id: 2 },
+				{ id: 4, name: 'Автомат №4', point_id: 3 },
+				{ id: 5, name: 'Автомат №5', point_id: 3 }
+			];
+			if (pointId === 'all') return all;
+			return all.filter(m => String(m.point_id) === String(pointId));
+		}
+
+		function getDemoCollections() {
+			const now = new Date();
+			const data = [];
+			const points = getDemoPoints();
+			const machines = getDemoMachines();
+
+			for (let d = 0; d < 90; d++) {
+				const date = new Date(now);
+				date.setDate(date.getDate() - d);
+				if (Math.random() > 0.3) continue;
+
+				const machine = machines[Math.floor(Math.random() * machines.length)];
+				const point = points.find(p => p.id === machine.point_id);
+				const amount = Math.floor(Math.random() * 2500) + 600;
+				const quantity = Math.floor(Math.random() * 25) + 8;
+
+				data.push({
+					created_at: date.toISOString(),
+					amount,
+					quantity,
+					point_id: point.id,
+					machine_id: machine.id,
+					point_name: point.name,
+					machine_name: machine.name,
+					collector: 'Инкассатор',
+					comment: 'Инкассирование'
+				});
+			}
+
+			return data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+		}
+
+		async function fetchJson(url) {
+			try {
+				const response = await fetch(url);
+				if (!response.ok) throw new Error();
+				return response.json();
+			} catch (e) {
+				if (url.includes('/api/points')) return getDemoPoints();
+				if (url.includes('/api/machines')) return getDemoMachines();
+				if (url.includes('/api/collections')) return getDemoCollections();
+				return [];
+			}
+		}
+
+		async function init() {
+			state.allPoints = await fetchJson('/api/points');
+			if (!Array.isArray(state.allPoints)) state.allPoints = getDemoPoints();
+
+			state.allMachines = await fetchJson('/api/machines');
+			if (!Array.isArray(state.allMachines)) state.allMachines = getDemoMachines();
+
+			state.allCollections = await fetchJson('/api/collections');
+			if (!Array.isArray(state.allCollections)) state.allCollections = getDemoCollections();
+
+			populateSelects();
+			setupCharts();
+			setupEventListeners();
+			updateDashboard();
+		}
+
+		function populateSelects() {
+			const pointSelect = document.getElementById('pointSelect');
+			state.allPoints.forEach(p => {
+				const opt = document.createElement('option');
+				opt.value = p.id;
+				opt.textContent = p.name;
+				pointSelect.appendChild(opt);
+			});
+
+			const machineSelect = document.getElementById('machineSelect');
+			state.allMachines.forEach(m => {
+				const opt = document.createElement('option');
+				opt.value = m.id;
+				opt.textContent = m.name;
+				machineSelect.appendChild(opt);
+			});
+
+			document.getElementById('machinesCount').textContent = state.allMachines.length;
+			document.getElementById('pointsCount').textContent = state.allPoints.length;
+		}
+
+		function setupCharts() {
+			const cfg = {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: { legend: { display: false } },
+				scales: {
+					x: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 12 } } },
+					y: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 12 } } }
+				}
+			};
+
+			state.charts.revenue = new Chart(document.getElementById('revenueChart').getContext('2d'), {
+				type: 'line',
+				data: { labels: [], datasets: [{ label: 'Выручка', data: [], borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.15)', borderWidth: 2.5, fill: true, pointRadius: 5, pointBackgroundColor: '#8b5cf6', tension: 0.4 }] },
+				options: cfg
+			});
+
+			state.charts.activity = new Chart(document.getElementById('activityChart').getContext('2d'), {
+				type: 'bar',
+				data: { labels: [], datasets: [{ label: 'Инкассации', data: [], backgroundColor: 'rgba(236, 72, 153, 0.8)', borderRadius: 6, borderSkipped: false }] },
+				options: cfg
+			});
+		}
+
+		function setupEventListeners() {
+			document.getElementById('pointSelect').addEventListener('change', e => {
+				state.pointId = e.target.value;
+				updateDashboard();
+			});
+
+			document.getElementById('machineSelect').addEventListener('change', e => {
+				state.machineId = e.target.value;
+				updateDashboard();
+			});
+
+			document.getElementById('intervalSelect').addEventListener('change', e => {
+				state.interval = e.target.value;
+				updateDashboard();
+			});
+
+			document.querySelectorAll('.range-btn').forEach(btn => {
+				btn.addEventListener('click', () => {
+					document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+					btn.classList.add('active');
+					state.days = Number(btn.dataset.days);
+					document.getElementById('periodInfo').textContent = state.days;
+					updateDashboard();
+				});
+			});
+		}
+
+		function filterData() {
+			return state.allCollections.filter(item => {
+				const pointMatch = state.pointId === 'all' || String(item.point_id) === String(state.pointId);
+				const machineMatch = state.machineId === 'all' || String(item.machine_id) === String(state.machineId);
+				const now = new Date();
+				const dateMatch = new Date(item.created_at) > new Date(now.getTime() - state.days * 24 * 60 * 60 * 1000);
+				return pointMatch && machineMatch && dateMatch;
+			});
+		}
+
+		function aggregateByInterval(items) {
+			const map = {};
+			items.forEach(item => {
+				const date = new Date(item.created_at);
+				let key;
+				if (state.interval === 'day') {
+					key = date.toISOString().split('T')[0];
+				} else if (state.interval === 'week') {
+					const d = new Date(date);
+					const weekStart = new Date(d.setDate(d.getDate() - d.getDay()));
+					key = weekStart.toISOString().split('T')[0];
+				} else {
+					key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+				}
+
+				if (!map[key]) map[key] = { revenue: 0, count: 0, date: new Date(key) };
+				map[key].revenue += Number(item.amount || 0);
+				map[key].count += 1;
+			});
+
+			return Object.entries(map).map(([k, v]) => ({ ...v, key: k })).sort((a, b) => a.date - b.date);
+		}
+
+		function formatLabel(dateStr, interval) {
+			const date = new Date(dateStr);
+			if (interval === 'day') return date.toLocaleDateString('ru-RU', { month: '2-digit', day: '2-digit' });
+			if (interval === 'week') return `Неделя ${Math.ceil(date.getDate() / 7)}`;
+			return date.toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' });
+		}
+
+		async function updateDashboard() {
+			const filtered = filterData();
+			const total = filtered.reduce((s, i) => s + Number(i.amount || 0), 0);
+
+			document.getElementById('totalAmount').textContent = `${total.toLocaleString('ru-RU')} ₴`;
+			document.getElementById('collectionsCount').textContent = filtered.length;
+			document.getElementById('pointName').textContent = state.pointId === 'all' ? 'Все точки' : state.allPoints.find(p => p.id == state.pointId)?.name || '-';
+			document.getElementById('machineName').textContent = state.machineId === 'all' ? 'Все автоматы' : state.allMachines.find(m => m.id == state.machineId)?.name || '-';
+			document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+			const aggregated = aggregateByInterval(filtered);
+			state.charts.revenue.data.labels = aggregated.map(d => formatLabel(d.key, state.interval));
+			state.charts.revenue.data.datasets[0].data = aggregated.map(d => d.revenue);
+			state.charts.revenue.update();
+
+			state.charts.activity.data.labels = aggregated.map(d => formatLabel(d.key, state.interval));
+			state.charts.activity.data.datasets[0].data = aggregated.map(d => d.count);
+			state.charts.activity.update();
+
+			// Recent
+			document.getElementById('recentArea').innerHTML = filtered.slice(0, 8).map(r => `
+				<div class="list-item">
+					<div>
+						<div class="list-time">${new Date(r.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
+						<div class="list-details">${r.point_name} / ${r.machine_name}</div>
+					</div>
+					<div class="list-amount">${r.amount} ₴</div>
+				</div>
+			`).join('') || '<div style="text-align: center; color: var(--text-tertiary); padding: 2rem;">Нет записей</div>';
+
+			// Machine log
+			if (state.machineId !== 'all') {
+				const items = state.allCollections.filter(i => String(i.machine_id) === String(state.machineId));
+				document.getElementById('machineLog').innerHTML = items.slice(0, 8).map(r => `
+					<div class="list-item">
+						<div>
+							<div class="list-time">${new Date(r.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
+							<div class="list-details">${r.point_name} · ${r.quantity} шт.</div>
+						</div>
+						<div class="list-amount">${r.amount} ₴</div>
+					</div>
+				`).join('') || '<div style="text-align: center; color: var(--text-tertiary); padding: 2rem;">Нет записей</div>';
+			} else {
+				document.getElementById('machineLog').innerHTML = '<div style="text-align: center; color: var(--text-tertiary); padding: 2rem;">Выберите автомат</div>';
+			}
+
+			// Summary table
+			const grouped = {};
+			filtered.forEach(i => {
+				const k = `${i.point_name}|${i.machine_name}`;
+				grouped[k] = grouped[k] || { point: i.point_name, machine: i.machine_name, count: 0, amount: 0, quantity: 0 };
+				grouped[k].count += 1;
+				grouped[k].amount += Number(i.amount || 0);
+				grouped[k].quantity += Number(i.quantity || 0);
+			});
+
+			document.getElementById('summaryTable').innerHTML = Object.values(grouped).length ? Object.values(grouped).sort((a, b) => b.amount - a.amount).map(g => `
+				<tr>
+					<td>${g.point}</td>
+					<td>${g.machine}</td>
+					<td>${g.count}</td>
+					<td>${g.amount.toLocaleString('ru-RU')} ₴</td>
+					<td>${g.quantity}</td>
+					<td>${(g.amount / g.count).toLocaleString('ru-RU', { maximumFractionDigits: 2 })} ₴</td>
+				</tr>
+			`).join('') : '<tr><td colspan="6" style="text-align: center;">Нет данных</td></tr>';
+		}
+
+		init();
+	</script>
+</body>
+</html>

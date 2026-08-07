@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Report Toys — Компактный Dashboard A</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg-primary: #0f172a;
+			--bg-secondary: #1e293b;
+			--text-primary: #f1f5f9;
+			--text-secondary: #cbd5e1;
+			--text-tertiary: #94a3b8;
+			--border: #334155;
+			--accent: #10b981;
+			--accent-2: #06b6d4;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		html, body {
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+			background: var(--bg-primary);
+			color: var(--text-primary);
+		}
+
+		header {
+			background: rgba(15, 23, 42, 0.95);
+			backdrop-filter: blur(10px);
+			border-bottom: 1px solid var(--border);
+			padding: 1rem 2rem;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		header h1 {
+			font-size: 1.3rem;
+			font-weight: 700;
+		}
+
+		header .tagline {
+			font-size: 0.85rem;
+			color: var(--text-tertiary);
+			margin-top: 0.25rem;
+		}
+
+		header nav a {
+			color: var(--text-secondary);
+			text-decoration: none;
+			font-size: 0.9rem;
+			padding: 0.5rem 1rem;
+			border-radius: 6px;
+			transition: 0.2s;
+		}
+
+		header nav a:hover {
+			background: var(--bg-secondary);
+		}
+
+		main {
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: 2rem;
+		}
+
+		.card {
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+		}
+
+		.kpi-grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 1.5rem;
+			margin-bottom: 2rem;
+		}
+
+		.kpi-card {
+			background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.05));
+			border: 1px solid rgba(16, 185, 129, 0.2);
+			border-radius: 12px;
+			padding: 1.5rem;
+		}
+
+		.kpi-value {
+			font-size: 1.8rem;
+			font-weight: 700;
+			color: var(--text-primary);
+		}
+
+		.kpi-label {
+			font-size: 0.85rem;
+			color: var(--text-tertiary);
+			margin-top: 0.5rem;
+		}
+
+		.controls {
+			display: flex;
+			gap: 1rem;
+			margin-bottom: 2rem;
+			flex-wrap: wrap;
+			align-items: flex-end;
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+		}
+
+		.control-group {
+			display: flex;
+			flex-direction: column;
+			gap: 0.4rem;
+		}
+
+		.control-label {
+			font-size: 0.8rem;
+			color: var(--text-tertiary);
+			font-weight: 600;
+			text-transform: uppercase;
+		}
+
+		select {
+			background: var(--bg-primary);
+			border: 1px solid var(--border);
+			color: var(--text-primary);
+			padding: 0.6rem 0.8rem;
+			border-radius: 6px;
+			min-width: 140px;
+		}
+
+		.range-buttons {
+			display: flex;
+			gap: 0.4rem;
+			flex-wrap: wrap;
+		}
+
+		.range-btn {
+			background: var(--bg-primary);
+			border: 1px solid var(--border);
+			color: var(--text-secondary);
+			padding: 0.5rem 0.8rem;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 0.85rem;
+			font-weight: 500;
+			transition: 0.2s;
+		}
+
+		.range-btn.active {
+			background: var(--accent);
+			border-color: var(--accent);
+			color: white;
+		}
+
+		.grid-main {
+			display: grid;
+			grid-template-columns: 1fr 300px;
+			gap: 2rem;
+			margin-bottom: 2rem;
+		}
+
+		.chart-section {
+			display: grid;
+			gap: 1.5rem;
+		}
+
+		.chart-wrapper {
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+			min-height: 300px;
+		}
+
+		canvas {
+			max-height: 250px;
+		}
+
+		.sidebar {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.sidebar-card {
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+		}
+
+		.sidebar-title {
+			font-weight: 600;
+			font-size: 0.95rem;
+			color: var(--text-primary);
+			margin-bottom: 0.75rem;
+		}
+
+		.sidebar-label {
+			font-size: 0.8rem;
+			color: var(--text-tertiary);
+			font-weight: 600;
+		}
+
+		.sidebar-value {
+			font-size: 1.3rem;
+			font-weight: 700;
+			color: var(--text-primary);
+			margin-top: 0.35rem;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.sidebar-item {
+			margin-top: 1rem;
+		}
+
+		.sidebar-item:first-child {
+			margin-top: 0;
+		}
+
+		.recent-list {
+			display: grid;
+			gap: 0.75rem;
+		}
+
+		.recent-item {
+			background: rgba(255, 255, 255, 0.03);
+			border: 1px solid rgba(255, 255, 255, 0.05);
+			border-radius: 8px;
+			padding: 0.75rem;
+			font-size: 0.85rem;
+		}
+
+		.recent-time {
+			color: var(--text-secondary);
+			font-weight: 500;
+		}
+
+		.recent-details {
+			color: var(--text-tertiary);
+			font-size: 0.8rem;
+			margin-top: 0.25rem;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 1rem;
+		}
+
+		th {
+			padding: 0.75rem;
+			text-align: left;
+			font-size: 0.8rem;
+			color: var(--text-tertiary);
+			font-weight: 600;
+			background: rgba(59, 130, 246, 0.05);
+			border-bottom: 1px solid var(--border);
+		}
+
+		td {
+			padding: 0.75rem;
+			border-bottom: 1px solid var(--border);
+			font-size: 0.9rem;
+			color: var(--text-secondary);
+		}
+
+		tbody tr:hover {
+			background: rgba(59, 130, 246, 0.05);
+		}
+
+		.stat-pill {
+			display: inline-block;
+			background: rgba(16, 185, 129, 0.1);
+			border: 1px solid rgba(16, 185, 129, 0.2);
+			color: #10b981;
+			padding: 0.35rem 0.65rem;
+			border-radius: 6px;
+			font-size: 0.8rem;
+			font-weight: 500;
+		}
+
+		.stat-pill.cyan {
+			background: rgba(6, 182, 212, 0.1);
+			border-color: rgba(6, 182, 212, 0.2);
+			color: #06b6d4;
+		}
+
+		@media (max-width: 1024px) {
+			.grid-main {
+				grid-template-columns: 1fr;
+			}
+
+			.kpi-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+
+		@media (max-width: 640px) {
+			main {
+				padding: 1rem;
+			}
+
+			.kpi-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.controls {
+				flex-direction: column;
+			}
+
+			.control-group {
+				width: 100%;
+			}
+
+			select {
+				width: 100%;
+				min-width: unset;
+			}
+
+			header {
+				flex-direction: column;
+				align-items: flex-start;
+			}
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<div>
+			<h1>Variant A — Компактный обзор</h1>
+			<div class="tagline">Оптимизированный вид с линейными графиками</div>
+		</div>
+		<nav>
+			<a href="/admin.html">Основная версия</a>
+			<a href="/admin_pro.html">Pro версия</a>
+			<a href="/admin_variant_b.html">Variant B</a>
+		</nav>
+	</header>
+
+	<main>
+		<!-- KPI -->
+		<div class="kpi-grid">
+			<div class="kpi-card">
+				<div class="kpi-value" id="totalAmount">0 ₴</div>
+				<div class="kpi-label">Общая выручка</div>
+			</div>
+			<div class="kpi-card">
+				<div class="kpi-value" id="collectionsCount">0</div>
+				<div class="kpi-label">Инкассаций</div>
+			</div>
+			<div class="kpi-card">
+				<div class="kpi-value" id="pointsCount">0</div>
+				<div class="kpi-label">Точек</div>
+			</div>
+			<div class="kpi-card">
+				<div class="kpi-value" id="machinesCount">0</div>
+				<div class="kpi-label">Автоматов</div>
+			</div>
+		</div>
+
+		<!-- Controls -->
+		<div class="controls">
+			<div class="control-group">
+				<label class="control-label">Точка</label>
+				<select id="pointSelect"></select>
+			</div>
+			<div class="control-group">
+				<label class="control-label">Автомат</label>
+				<select id="machineSelect"></select>
+			</div>
+			<div class="control-group">
+				<label class="control-label">Интервал</label>
+				<select id="intervalSelect">
+					<option value="day">По дням</option>
+					<option value="week">По неделям</option>
+					<option value="month">По месяцам</option>
+				</select>
+			</div>
+			<div class="control-group">
+				<label class="control-label">Период</label>
+				<div class="range-buttons">
+					<button class="range-btn active" data-days="7">7</button>
+					<button class="range-btn" data-days="14">14</button>
+					<button class="range-btn" data-days="30">30</button>
+					<button class="range-btn" data-days="90">90</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Main Content -->
+		<div class="grid-main">
+			<div class="chart-section">
+				<div class="chart-wrapper">
+					<h3 style="margin: 0 0 1rem; font-size: 1rem; color: var(--text-primary);">Динамика выручки</h3>
+					<canvas id="revenueChart"></canvas>
+				</div>
+				<div class="chart-wrapper">
+					<h3 style="margin: 0 0 1rem; font-size: 1rem; color: var(--text-primary);">Активность инкассаций</h3>
+					<canvas id="activityChart"></canvas>
+				</div>
+			</div>
+
+			<!-- Sidebar -->
+			<div class="sidebar">
+				<div class="sidebar-card">
+					<div class="sidebar-title">Текущие данные</div>
+					<div class="sidebar-item">
+						<div class="sidebar-label">Точка</div>
+						<div class="sidebar-value" id="pointName">Все точки</div>
+					</div>
+					<div class="sidebar-item">
+						<div class="sidebar-label">Автомат</div>
+						<div class="sidebar-value" id="machineName">Все автоматы</div>
+					</div>
+				</div>
+
+				<div class="sidebar-card">
+					<div class="sidebar-title">Последние записи</div>
+					<div id="recentArea" style="font-size: 0.85rem; color: var(--text-tertiary);">Загрузка...</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Summary Table -->
+		<div class="card">
+			<h3 style="margin: 0 0 1rem; font-size: 1rem; color: var(--text-primary);">Сводка по точкам/автоматам</h3>
+			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+				<div></div>
+				<span class="stat-pill">Авто-обновление</span>
+			</div>
+			<div style="overflow-x: auto;">
+				<table>
+					<thead>
+						<tr>
+							<th>Точка</th>
+							<th>Автомат</th>
+							<th>Инкассаций</th>
+							<th>Выручка</th>
+							<th>Товаров</th>
+						</tr>
+					</thead>
+					<tbody id="summaryTable">
+						<tr>
+							<td colspan="5" style="text-align: center; color: var(--text-tertiary);">Загрузка...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		const state = {
+			pointId: 'all',
+			machineId: 'all',
+			days: 7,
+			interval: 'day',
+			allPoints: [],
+			allMachines: [],
+			allCollections: [],
+			charts: {}
+		};
+
+		function getDemoPoints() {
+			return [
+				{ id: 1, name: 'Точка 1' },
+				{ id: 2, name: 'Точка 2' },
+				{ id: 3, name: 'Точка 3' }
+			];
+		}
+
+		function getDemoMachines(pointId = null) {
+			const all = [
+				{ id: 1, name: 'Автомат №1', point_id: 1 },
+				{ id: 2, name: 'Автомат №2', point_id: 1 },
+				{ id: 3, name: 'Автомат №3', point_id: 2 },
+				{ id: 4, name: 'Автомат №4', point_id: 3 },
+				{ id: 5, name: 'Автомат №5', point_id: 3 }
+			];
+			if (pointId === 'all') return all;
+			return all.filter(m => String(m.point_id) === String(pointId));
+		}
+
+		function getDemoCollections() {
+			const now = new Date();
+			const data = [];
+			const points = getDemoPoints();
+			const machines = getDemoMachines();
+
+			for (let d = 0; d < 90; d++) {
+				const date = new Date(now);
+				date.setDate(date.getDate() - d);
+				if (Math.random() > 0.35) continue;
+
+				const machine = machines[Math.floor(Math.random() * machines.length)];
+				const point = points.find(p => p.id === machine.point_id);
+				const amount = Math.floor(Math.random() * 2000) + 500;
+				const quantity = Math.floor(Math.random() * 20) + 5;
+
+				data.push({
+					created_at: date.toISOString(),
+					amount,
+					quantity,
+					point_id: point.id,
+					machine_id: machine.id,
+					point_name: point.name,
+					machine_name: machine.name,
+					collector: 'Demo',
+					comment: 'Demo collection'
+				});
+			}
+
+			return data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+		}
+
+		async function fetchJson(url) {
+			try {
+				const response = await fetch(url);
+				if (!response.ok) throw new Error();
+				return response.json();
+			} catch (e) {
+				if (url.includes('/api/points')) return getDemoPoints();
+				if (url.includes('/api/machines')) return getDemoMachines();
+				if (url.includes('/api/collections')) return getDemoCollections();
+				return [];
+			}
+		}
+
+		async function init() {
+			state.allPoints = await fetchJson('/api/points');
+			if (!Array.isArray(state.allPoints)) state.allPoints = getDemoPoints();
+
+			state.allMachines = await fetchJson('/api/machines');
+			if (!Array.isArray(state.allMachines)) state.allMachines = getDemoMachines();
+
+			state.allCollections = await fetchJson('/api/collections');
+			if (!Array.isArray(state.allCollections)) state.allCollections = getDemoCollections();
+
+			populateSelects();
+			setupCharts();
+			setupEventListeners();
+			updateDashboard();
+		}
+
+		function populateSelects() {
+			const pointSelect = document.getElementById('pointSelect');
+			state.allPoints.forEach(p => {
+				const opt = document.createElement('option');
+				opt.value = p.id;
+				opt.textContent = p.name;
+				pointSelect.appendChild(opt);
+			});
+
+			const machineSelect = document.getElementById('machineSelect');
+			state.allMachines.forEach(m => {
+				const opt = document.createElement('option');
+				opt.value = m.id;
+				opt.textContent = m.name;
+				machineSelect.appendChild(opt);
+			});
+
+			document.getElementById('machinesCount').textContent = state.allMachines.length;
+			document.getElementById('pointsCount').textContent = state.allPoints.length;
+		}
+
+		function setupCharts() {
+			const cfg = {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: { legend: { display: false } },
+				scales: {
+					x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 11 } } },
+					y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 11 } } }
+				}
+			};
+
+			state.charts.revenue = new Chart(document.getElementById('revenueChart').getContext('2d'), {
+				type: 'line',
+				data: { labels: [], datasets: [{ label: 'Выручка', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', borderWidth: 2, fill: true, tension: 0.4 }] },
+				options: cfg
+			});
+
+			state.charts.activity = new Chart(document.getElementById('activityChart').getContext('2d'), {
+				type: 'line',
+				data: { labels: [], datasets: [{ label: 'Инкассации', data: [], borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.1)', borderWidth: 2, fill: true, tension: 0.4 }] },
+				options: cfg
+			});
+		}
+
+		function setupEventListeners() {
+			document.getElementById('pointSelect').addEventListener('change', e => {
+				state.pointId = e.target.value;
+				updateDashboard();
+			});
+
+			document.getElementById('machineSelect').addEventListener('change', e => {
+				state.machineId = e.target.value;
+				updateDashboard();
+			});
+
+			document.getElementById('intervalSelect').addEventListener('change', e => {
+				state.interval = e.target.value;
+				updateDashboard();
+			});
+
+			document.querySelectorAll('.range-btn').forEach(btn => {
+				btn.addEventListener('click', () => {
+					document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+					btn.classList.add('active');
+					state.days = Number(btn.dataset.days);
+					updateDashboard();
+				});
+			});
+		}
+
+		function filterData() {
+			return state.allCollections.filter(item => {
+				const pointMatch = state.pointId === 'all' || String(item.point_id) === String(state.pointId);
+				const machineMatch = state.machineId === 'all' || String(item.machine_id) === String(state.machineId);
+				const now = new Date();
+				const dateMatch = new Date(item.created_at) > new Date(now.getTime() - state.days * 24 * 60 * 60 * 1000);
+				return pointMatch && machineMatch && dateMatch;
+			});
+		}
+
+		function aggregateByInterval(items) {
+			const map = {};
+			items.forEach(item => {
+				const date = new Date(item.created_at);
+				let key;
+				if (state.interval === 'day') {
+					key = date.toISOString().split('T')[0];
+				} else if (state.interval === 'week') {
+					const d = new Date(date);
+					const weekStart = new Date(d.setDate(d.getDate() - d.getDay()));
+					key = weekStart.toISOString().split('T')[0];
+				} else {
+					key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+				}
+
+				if (!map[key]) map[key] = { revenue: 0, count: 0, date: new Date(key) };
+				map[key].revenue += Number(item.amount || 0);
+				map[key].count += 1;
+			});
+
+			return Object.entries(map).map(([k, v]) => ({ ...v, key: k })).sort((a, b) => a.date - b.date);
+		}
+
+		function formatLabel(dateStr, interval) {
+			const date = new Date(dateStr);
+			if (interval === 'day') return date.toLocaleDateString('ru-RU', { month: '2-digit', day: '2-digit' });
+			if (interval === 'week') return `Неделя ${Math.ceil(date.getDate() / 7)}`;
+			return date.toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' });
+		}
+
+		async function updateDashboard() {
+			const filtered = filterData();
+			const total = filtered.reduce((s, i) => s + Number(i.amount || 0), 0);
+
+			document.getElementById('totalAmount').textContent = `${total.toLocaleString('ru-RU')} ₴`;
+			document.getElementById('collectionsCount').textContent = filtered.length;
+			document.getElementById('pointName').textContent = state.pointId === 'all' ? 'Все точки' : state.allPoints.find(p => p.id == state.pointId)?.name || '-';
+			document.getElementById('machineName').textContent = state.machineId === 'all' ? 'Все автоматы' : state.allMachines.find(m => m.id == state.machineId)?.name || '-';
+
+			const aggregated = aggregateByInterval(filtered);
+			state.charts.revenue.data.labels = aggregated.map(d => formatLabel(d.key, state.interval));
+			state.charts.revenue.data.datasets[0].data = aggregated.map(d => d.revenue);
+			state.charts.revenue.update();
+
+			state.charts.activity.data.labels = aggregated.map(d => formatLabel(d.key, state.interval));
+			state.charts.activity.data.datasets[0].data = aggregated.map(d => d.count);
+			state.charts.activity.update();
+
+			// Recent
+			document.getElementById('recentArea').innerHTML = filtered.slice(0, 6).map(r => `
+				<div class="recent-item">
+					<div class="recent-time">${new Date(r.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
+					<div class="recent-details">${r.point_name} / ${r.machine_name}</div>
+					<div style="color: var(--accent); font-weight: 600;">${r.amount} ₴</div>
+				</div>
+			`).join('') || '<div style="color: var(--text-tertiary);">Нет записей</div>';
+
+			// Summary table
+			const grouped = {};
+			filtered.forEach(i => {
+				const k = `${i.point_name}|${i.machine_name}`;
+				grouped[k] = grouped[k] || { point: i.point_name, machine: i.machine_name, count: 0, amount: 0, quantity: 0 };
+				grouped[k].count += 1;
+				grouped[k].amount += Number(i.amount || 0);
+				grouped[k].quantity += Number(i.quantity || 0);
+			});
+
+			document.getElementById('summaryTable').innerHTML = Object.values(grouped).length ? Object.values(grouped).map(g => `
+				<tr>
+					<td>${g.point}</td>
+					<td>${g.machine}</td>
+					<td>${g.count}</td>
+					<td>${g.amount.toLocaleString('ru-RU')} ₴</td>
+					<td>${g.quantity}</td>
+				</tr>
+			`).join('') : '<tr><td colspan="5" style="text-align: center;">Нет данных</td></tr>';
+		}
+
+		init();
+	</script>
+</body>
+</html>

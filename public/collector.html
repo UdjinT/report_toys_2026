@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Report Toys — Инкассатор</title>
+	<link rel="manifest" href="/manifest.webmanifest" />
+	<style>
+		:root {
+			color: #0f172a;
+			background: #f8fafc;
+			font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			background: #f8fafc;
+			color: #0f172a;
+		}
+
+		header {
+			background: #1e293b;
+			padding: 1.5rem 1rem;
+			color: #fff;
+		}
+
+		header h1 {
+			margin: 0;
+			font-size: clamp(1.8rem, 2.5vw, 2.6rem);
+		}
+
+		main {
+			width: min(820px, 100%);
+			margin: 0 auto;
+			padding: 1.5rem;
+		}
+
+		.card {
+			background: #fff;
+			border-radius: 24px;
+			box-shadow: 0 24px 60px rgba(15, 23, 42, .08);
+			padding: 1.5rem;
+		}
+
+		.card h2 {
+			margin-top: 0;
+		}
+
+		.field {
+			display: grid;
+			gap: .4rem;
+			margin-bottom: 1rem;
+		}
+
+		label {
+			font-size: .95rem;
+			font-weight: 700;
+			color: #334155;
+		}
+
+		select,
+		input,
+		textarea {
+			width: 100%;
+			min-height: 46px;
+			border: 1px solid #cbd5e1;
+			border-radius: 16px;
+			padding: 1rem;
+			font: inherit;
+			color: #0f172a;
+			background: #f8fafc;
+		}
+
+		textarea {
+			min-height: 120px;
+			resize: vertical;
+		}
+
+		button {
+			border: none;
+			border-radius: 999px;
+			padding: 1rem 1.6rem;
+			background: #0f172a;
+			color: #fff;
+			font-weight: 700;
+			cursor: pointer;
+			transition: background .16s ease;
+		}
+
+		button:hover {
+			background: #111827;
+		}
+
+		.hint {
+			color: #475569;
+			font-size: .95rem;
+			margin-bottom: 1rem;
+		}
+
+		.actions {
+			display: flex;
+			justify-content: space-between;
+			flex-wrap: wrap;
+			gap: .75rem;
+			margin-bottom: 1.25rem;
+		}
+
+		.nav-link {
+			color: #0f172a;
+			text-decoration: none;
+			font-weight: 700;
+		}
+
+		.nav-link:hover {
+			text-decoration: underline;
+		}
+
+		.message {
+			margin-top: 1rem;
+			color: #0f172a;
+		}
+	</style>
+</head>
+
+<body>
+	<header>
+		<h1>Report Toys — Инкассатор</h1>
+	</header>
+	<main>
+		<div class="actions">
+			<a href="/" class="nav-link">← На выбор интерфейса</a>
+			<a href="/admin.html" class="nav-link">Админ панель →</a>
+		</div>
+
+		<section class="card">
+			<h2>Внести инкассацию</h2>
+			<p class="hint">Выбирайте точку и автомат, вводите сумму и количество.</p>
+			<div class="field"><label for="point">Точка</label><select id="point"></select></div>
+			<div class="field"><label for="machine">Автомат</label><select id="machine"></select></div>
+			<div class="field"><label for="collector">Инкассатор</label><input id="collector" placeholder="Ваше имя" />
+			</div>
+			<div class="field"><label for="amount">Сумма (грн)</label><input id="amount" type="number" min="0" /></div>
+			<div class="field"><label for="quantity">Количество</label><input id="quantity" type="number" min="0" /></div>
+			<div class="field"><label for="comment">Комментарий</label><textarea id="comment"
+					placeholder="Комментарий при необходимости"></textarea></div>
+			<button id="saveBtn">Сохранить</button>
+			<div id="message" class="message"></div>
+		</section>
+	</main>
+
+	<script>
+		async function fetchJson(url, options) {
+			console.log('fetch', url, options);
+			const response = await fetch(url, options);
+			console.log('fetch response', url, response.status);
+			if (!response.ok) {
+				const text = await response.text();
+				console.error('fetch error body', text);
+				throw new Error('Сетевая ошибка: ' + response.status + ' ' + text);
+			}
+			return response.json();
+		}
+
+		async function loadPoints() {
+			const points = await fetchJson('/api/points');
+			const pointSelect = document.getElementById('point');
+			pointSelect.innerHTML = points.length ? '' : '<option value="">Нет точек</option>';
+			points.forEach((p) => {
+				const option = document.createElement('option');
+				option.value = p.id;
+				option.textContent = p.name;
+				pointSelect.appendChild(option);
+			});
+			if (points.length > 0) {
+				pointSelect.value = points[0].id;
+				await loadMachines(points[0].id);
+			}
+		}
+
+		async function loadMachines(pointId) {
+			const machines = await fetchJson('/api/machines?pointId=' + encodeURIComponent(pointId));
+			const machineSelect = document.getElementById('machine');
+			machineSelect.innerHTML = machines.length ? '' : '<option value="">Нет автоматов</option>';
+			machines.forEach((m) => {
+				const option = document.createElement('option');
+				option.value = m.id;
+				option.textContent = m.name;
+				machineSelect.appendChild(option);
+			});
+		}
+
+		document.getElementById('point').addEventListener('change', async (event) => {
+			await loadMachines(event.target.value);
+		});
+
+		document.getElementById('saveBtn').addEventListener('click', async () => {
+			const machineId = document.getElementById('machine').value;
+			const collector = document.getElementById('collector').value.trim();
+			const amount = Number(document.getElementById('amount').value);
+			const quantity = Number(document.getElementById('quantity').value);
+			const comment = document.getElementById('comment').value.trim();
+			const message = document.getElementById('message');
+			message.textContent = '';
+
+			if (!machineId || !collector || !amount) {
+				message.textContent = 'Заполните точку, автомат, инкассатора и сумму.';
+				return;
+			}
+
+			await fetchJson('/api/deposit', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ machineId, collector, amount, quantity, comment }),
+			});
+			message.textContent = 'Инкассация сохранена.';
+			document.getElementById('amount').value = '';
+			document.getElementById('quantity').value = '';
+			document.getElementById('comment').value = '';
+		});
+
+		loadPoints();
+	</script>
+</body>
+
+</html>

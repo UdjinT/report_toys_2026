@@ -1,0 +1,21 @@
+{
+  "name": "report_toys_2026",
+  "private": true,
+  "version": "0.1.0",
+  "description": "PWA and web reporting for toy vending machines with Cloudflare Workers + D1.",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "dev:8788": "wrangler dev",
+    "build": "wrangler build",
+    "publish": "wrangler publish",
+    "deploy": "wrangler publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.7",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.114.0"
+  },
+  "dependencies": {
+    "@cloudflare/kv-asset-handler": "^0.2.0"
+  }
+}

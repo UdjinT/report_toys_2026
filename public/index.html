@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Report Toys — Выбор версии</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg-primary: #0f172a;
+			--bg-secondary: #1e293b;
+			--text-primary: #f1f5f9;
+			--text-secondary: #cbd5e1;
+			--text-tertiary: #94a3b8;
+			--border: #334155;
+			--accent-blue: #3b82f6;
+			--accent-green: #10b981;
+			--accent-cyan: #06b6d4;
+			--accent-purple: #8b5cf6;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		html, body {
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+			background: linear-gradient(135deg, #0f172a 0%, #1a1f35 50%, #0f1621 100%);
+			color: var(--text-primary);
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+		}
+
+		main {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 2rem;
+		}
+
+		.container {
+			width: 100%;
+			max-width: 1200px;
+			animation: fadeIn 0.6s ease-in;
+		}
+
+		@keyframes fadeIn {
+			from { opacity: 0; transform: translateY(10px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		header {
+			text-align: center;
+			margin-bottom: 4rem;
+		}
+
+		header h1 {
+			font-size: clamp(2rem, 5vw, 3.5rem);
+			font-weight: 800;
+			letter-spacing: -0.02em;
+			margin-bottom: 1rem;
+			background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		header p {
+			font-size: 1.2rem;
+			color: var(--text-tertiary);
+			max-width: 600px;
+			margin: 0 auto;
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 2rem;
+			margin-bottom: 3rem;
+		}
+
+		.card {
+			position: relative;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.05));
+			border: 1px solid rgba(59, 130, 246, 0.2);
+			border-radius: 16px;
+			padding: 2rem;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			overflow: hidden;
+			text-decoration: none;
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.card::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			right: -50%;
+			width: 300px;
+			height: 300px;
+			background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent);
+			border-radius: 50%;
+			pointer-events: none;
+		}
+
+		.card:hover {
+			border-color: rgba(59, 130, 246, 0.4);
+			transform: translateY(-4px);
+		}
+
+		.card-content {
+			position: relative;
+			z-index: 1;
+		}
+
+		.card-icon {
+			font-size: 2.5rem;
+			margin-bottom: 0.5rem;
+		}
+
+		.card h2 {
+			font-size: 1.5rem;
+			font-weight: 700;
+			margin: 0;
+		}
+
+		.card .desc {
+			color: var(--text-tertiary);
+			font-size: 0.95rem;
+			line-height: 1.6;
+		}
+
+		.card .features {
+			display: grid;
+			gap: 0.5rem;
+			margin-top: 1rem;
+			font-size: 0.85rem;
+			color: var(--text-secondary);
+		}
+
+		.card .feature {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.card .feature::before {
+			content: '✓';
+			color: #10b981;
+			font-weight: 700;
+		}
+
+		.card.blue {
+			border-color: rgba(59, 130, 246, 0.3);
+		}
+
+		.card.blue:hover {
+			border-color: rgba(59, 130, 246, 0.5);
+			box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+		}
+
+		.card.green {
+			background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.05));
+			border-color: rgba(16, 185, 129, 0.2);
+		}
+
+		.card.green:hover {
+			border-color: rgba(16, 185, 129, 0.4);
+			box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+		}
+
+		.card.purple {
+			background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.05));
+			border-color: rgba(139, 92, 246, 0.3);
+		}
+
+		.card.purple:hover {
+			border-color: rgba(139, 92, 246, 0.5);
+			box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+		}
+
+		.card.cyan {
+			background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(59, 130, 246, 0.05));
+			border-color: rgba(6, 182, 212, 0.2);
+		}
+
+		.card.cyan:hover {
+			border-color: rgba(6, 182, 212, 0.4);
+			box-shadow: 0 0 30px rgba(6, 182, 212, 0.2);
+		}
+
+		.card.secondary {
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+			border-color: rgba(255, 255, 255, 0.1);
+		}
+
+		.card.secondary:hover {
+			border-color: rgba(255, 255, 255, 0.2);
+			box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+		}
+
+		.role-section {
+			margin-top: 4rem;
+			padding-top: 3rem;
+			border-top: 1px solid var(--border);
+		}
+
+		.role-section h2 {
+			font-size: 1.8rem;
+			font-weight: 700;
+			margin-bottom: 2rem;
+			text-align: center;
+		}
+
+		.role-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 1.5rem;
+		}
+
+		.role-card {
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+			text-align: center;
+			cursor: pointer;
+			transition: all 0.2s;
+			text-decoration: none;
+			color: inherit;
+		}
+
+		.role-card:hover {
+			border-color: var(--accent-blue);
+			transform: translateY(-2px);
+		}
+
+		.role-card .icon {
+			font-size: 2rem;
+			margin-bottom: 1rem;
+		}
+
+		.role-card h3 {
+			font-size: 1.2rem;
+			margin-bottom: 0.5rem;
+		}
+
+		.role-card p {
+			color: var(--text-tertiary);
+			font-size: 0.9rem;
+		}
+
+		footer {
+			text-align: center;
+			padding: 2rem;
+			color: var(--text-tertiary);
+			border-top: 1px solid var(--border);
+		}
+
+		footer p {
+			font-size: 0.85rem;
+		}
+
+		.badge {
+			display: inline-block;
+			background: rgba(59, 130, 246, 0.2);
+			color: #60a5fa;
+			padding: 0.25rem 0.75rem;
+			border-radius: 20px;
+			font-size: 0.75rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			margin-bottom: 0.75rem;
+		}
+
+		.badge.new {
+			background: rgba(16, 185, 129, 0.2);
+			color: #6ee7b7;
+		}
+
+		.badge.pro {
+			background: rgba(139, 92, 246, 0.2);
+			color: #c4b5fd;
+		}
+
+		@media (max-width: 640px) {
+			header h1 {
+				font-size: 2rem;
+			}
+
+			header p {
+				font-size: 1rem;
+			}
+
+			.grid {
+				grid-template-columns: 1fr;
+			}
+
+			.role-grid {
+				grid-template-columns: 1fr;
+			}
+
+			main {
+				padding: 1rem;
+			}
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<div class="container">
+			<header>
+				<h1>Report Toys Dashboard</h1>
+				<p>Выберите версию интерфейса для управления точками продаж и автоматами</p>
+			</header>
+
+			<div class="grid">
+				<!-- Main Admin -->
+				<a href="/admin.html" class="card blue">
+					<div class="card-content">
+						<div class="badge">ОСНОВНОЙ</div>
+						<div class="card-icon">📊</div>
+						<h2>Основная версия</h2>
+						<p class="desc">Полнофункциональная панель с максимумом информации и графиков.</p>
+						<div class="features">
+							<div class="feature">Выбор по дням/неделям/месяцам</div>
+							<div class="feature">Интерактивные графики</div>
+							<div class="feature">Детальная таблица данных</div>
+							<div class="feature">История инкассаций</div>
+						</div>
+					</div>
+				</a>
+
+				<!-- Pro Version -->
+				<a href="/admin_pro.html" class="card purple">
+					<div class="card-content">
+						<div class="badge pro">PRO</div>
+						<div class="card-icon">✨</div>
+						<h2>Pro версия</h2>
+						<p class="desc">Премиум интерфейс с расширенными аналитическими возможностями.</p>
+						<div class="features">
+							<div class="feature">Продвинутые фильтры</div>
+							<div class="feature">Гибкие периоды анализа</div>
+							<div class="feature">Детальные метрики</div>
+							<div class="feature">Темный современный дизайн</div>
+						</div>
+					</div>
+				</a>
+
+				<!-- Variant A -->
+				<a href="/admin_variant_a.html" class="card green">
+					<div class="card-content">
+						<div class="badge new">КОМПАКТНАЯ</div>
+						<div class="card-icon">📈</div>
+						<h2>Вариант A</h2>
+						<p class="desc">Оптимизированный вид с линейными графиками для быстрого анализа.</p>
+						<div class="features">
+							<div class="feature">Компактный макет</div>
+							<div class="feature">Линейные графики</div>
+							<div class="feature">Боковая панель</div>
+							<div class="feature">Быстрая навигация</div>
+						</div>
+					</div>
+				</a>
+
+				<!-- Variant B -->
+				<a href="/admin_variant_b.html" class="card cyan">
+					<div class="card-content">
+						<div class="badge">ДЕТАЛЬНАЯ</div>
+						<div class="card-icon">🎨</div>
+						<h2>Вариант B</h2>
+						<p class="desc">Детальный анализ с красивым визуальным оформлением и граммофоном фиолетово-розовой цветовой схемы.</p>
+						<div class="features">
+							<div class="feature">Премиум дизайн</div>
+							<div class="feature">Полный контроль</div>
+							<div class="feature">Расширенная статистика</div>
+							<div class="feature">Максимальная информация</div>
+						</div>
+					</div>
+				</a>
+
+				<!-- Collector -->
+				<a href="/collector.html" class="card secondary">
+					<div class="card-content">
+						<div class="card-icon">🚚</div>
+						<h2>Панель инкассатора</h2>
+						<p class="desc">Мобильный интерфейс для инкассаторов с регистрацией сборок.</p>
+						<div class="features">
+							<div class="feature">Быстрая регистрация</div>
+							<div class="feature">Мобильный дизайн</div>
+							<div class="feature">История операций</div>
+							<div class="feature">Оффлайн режим</div>
+						</div>
+					</div>
+				</a>
+			</div>
+
+			<div class="role-section">
+				<h2>Быстрые ссылки</h2>
+				<div class="role-grid">
+					<a href="/admin.html" class="role-card">
+						<div class="icon">👨‍💼</div>
+						<h3>Администратор</h3>
+						<p>Управление всеми данными</p>
+					</a>
+					<a href="/collector.html" class="role-card">
+						<div class="icon">🔑</div>
+						<h3>Инкассатор</h3>
+						<p>Мобильная панель сборки</p>
+					</a>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<footer>
+		<p>© 2026 Report Toys — Система управления торговыми автоматами</p>
+		<p style="margin-top: 0.5rem; font-size: 0.8rem;">Версия 2.0 — Полностью переработанный дизайн</p>
+	</footer>
+</body>
+</html>

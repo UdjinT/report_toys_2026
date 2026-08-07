@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Report Toys — Pro Dashboard</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg-primary: #0f172a;
+			--bg-secondary: #1e293b;
+			--bg-tertiary: #334155;
+			--bg-hover: #475569;
+			--text-primary: #f1f5f9;
+			--text-secondary: #cbd5e1;
+			--text-tertiary: #94a3b8;
+			--border: #334155;
+			--border-light: #475569;
+			--accent: #3b82f6;
+			--accent-dark: #1e40af;
+			--accent-light: #60a5fa;
+			--success: #10b981;
+			--warning: #f59e0b;
+			--error: #ef4444;
+			--purple: #8b5cf6;
+			--cyan: #06b6d4;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		html, body {
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+			background: var(--bg-primary);
+			color: var(--text-primary);
+			line-height: 1.5;
+		}
+
+		::selection {
+			background: var(--accent);
+			color: white;
+		}
+
+		/* ===== HEADER ===== */
+		header {
+			position: sticky;
+			top: 0;
+			z-index: 100;
+			background: rgba(15, 23, 42, 0.95);
+			backdrop-filter: blur(10px);
+			border-bottom: 1px solid var(--border);
+			padding: 1rem 2rem;
+		}
+
+		header .inner {
+			max-width: 1600px;
+			margin: 0 auto;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 2rem;
+		}
+
+		header .logo {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			font-size: 1.3rem;
+			font-weight: 700;
+			letter-spacing: -0.02em;
+		}
+
+		header .logo svg {
+			width: 28px;
+			height: 28px;
+		}
+
+		header nav {
+			display: flex;
+			gap: 1.5rem;
+			align-items: center;
+			margin-left: auto;
+		}
+
+		header a {
+			color: var(--text-secondary);
+			text-decoration: none;
+			font-size: 0.9rem;
+			padding: 0.5rem 1rem;
+			border-radius: 8px;
+			transition: all 0.2s ease;
+		}
+
+		header a:hover {
+			background: var(--bg-secondary);
+			color: var(--text-primary);
+		}
+
+		/* ===== LAYOUT ===== */
+		body {
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+		}
+
+		main {
+			flex: 1;
+			max-width: 1600px;
+			width: 100%;
+			margin: 0 auto;
+			padding: 2rem;
+		}
+
+		/* ===== CARDS ===== */
+		.card {
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+			transition: all 0.2s ease;
+		}
+
+		.card:hover {
+			border-color: var(--border-light);
+		}
+
+		.card-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 1rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.card h2 {
+			font-size: 1.1rem;
+			font-weight: 600;
+			color: var(--text-primary);
+		}
+
+		/* ===== METRICS/KPI ===== */
+		.metrics-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+			gap: 1.5rem;
+			margin-bottom: 2rem;
+		}
+
+		.metric-card {
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.05));
+			border: 1px solid rgba(59, 130, 246, 0.2);
+			border-radius: 12px;
+			padding: 1.5rem;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.metric-card::before {
+			content: "";
+			position: absolute;
+			top: -50%;
+			right: -50%;
+			width: 200px;
+			height: 200px;
+			background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent);
+			border-radius: 50%;
+			pointer-events: none;
+		}
+
+		.metric-content {
+			position: relative;
+			z-index: 1;
+		}
+
+		.metric-value {
+			font-size: 2rem;
+			font-weight: 700;
+			color: var(--text-primary);
+			line-height: 1;
+			margin-bottom: 0.5rem;
+		}
+
+		.metric-label {
+			font-size: 0.85rem;
+			color: var(--text-tertiary);
+			font-weight: 500;
+		}
+
+		/* ===== CONTROLS/FILTERS ===== */
+		.controls {
+			display: flex;
+			gap: 1.5rem;
+			flex-wrap: wrap;
+			align-items: flex-end;
+			margin-bottom: 2rem;
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+		}
+
+		.control-group {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			flex: 1;
+			min-width: 160px;
+		}
+
+		.control-label {
+			font-size: 0.85rem;
+			font-weight: 600;
+			color: var(--text-secondary);
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		select, input {
+			background: var(--bg-primary);
+			border: 1px solid var(--border);
+			color: var(--text-primary);
+			padding: 0.7rem 1rem;
+			border-radius: 8px;
+			font-family: inherit;
+			font-size: 0.95rem;
+			transition: all 0.2s ease;
+		}
+
+		select:hover, input:hover {
+			border-color: var(--border-light);
+		}
+
+		select:focus, input:focus {
+			outline: none;
+			border-color: var(--accent);
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+		}
+
+		/* ===== TIME RANGE BUTTONS ===== */
+		.range-buttons {
+			display: flex;
+			gap: 0.5rem;
+			flex-wrap: wrap;
+		}
+
+		.range-btn {
+			background: var(--bg-primary);
+			border: 1px solid var(--border);
+			color: var(--text-secondary);
+			padding: 0.6rem 1rem;
+			border-radius: 8px;
+			cursor: pointer;
+			font-size: 0.9rem;
+			font-weight: 500;
+			transition: all 0.2s ease;
+		}
+
+		.range-btn:hover {
+			border-color: var(--border-light);
+		}
+
+		.range-btn.active {
+			background: var(--accent);
+			border-color: var(--accent);
+			color: white;
+		}
+
+		/* ===== GRID LAYOUTS ===== */
+		.grid-2 {
+			display: grid;
+			grid-template-columns: 2fr 1fr;
+			gap: 2rem;
+		}
+
+		.grid-3 {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 2rem;
+		}
+
+		/* ===== CHARTS ===== */
+		.chart-container {
+			position: relative;
+			height: 320px;
+			margin-bottom: 1rem;
+		}
+
+		canvas {
+			max-height: 300px;
+		}
+
+		/* ===== TABLES ===== */
+		.table-wrapper {
+			overflow-x: auto;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		thead {
+			background: rgba(59, 130, 246, 0.05);
+		}
+
+		th {
+			padding: 1rem;
+			text-align: left;
+			font-weight: 600;
+			font-size: 0.9rem;
+			color: var(--text-secondary);
+			border-bottom: 1px solid var(--border);
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		td {
+			padding: 1rem;
+			border-bottom: 1px solid var(--border);
+			color: var(--text-secondary);
+			font-size: 0.95rem;
+		}
+
+		tbody tr:hover {
+			background: rgba(59, 130, 246, 0.05);
+		}
+
+		/* ===== STATS PILLS ===== */
+		.stat-pill {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.4rem 0.8rem;
+			background: rgba(16, 185, 129, 0.1);
+			border: 1px solid rgba(16, 185, 129, 0.2);
+			color: #10b981;
+			border-radius: 8px;
+			font-size: 0.85rem;
+			font-weight: 500;
+		}
+
+		.stat-pill.purple {
+			background: rgba(139, 92, 246, 0.1);
+			border-color: rgba(139, 92, 246, 0.2);
+			color: #8b5cf6;
+		}
+
+		.stat-pill.blue {
+			background: rgba(59, 130, 246, 0.1);
+			border-color: rgba(59, 130, 246, 0.2);
+			color: #3b82f6;
+		}
+
+		.stat-pill.cyan {
+			background: rgba(6, 182, 212, 0.1);
+			border-color: rgba(6, 182, 212, 0.2);
+			color: #06b6d4;
+		}
+
+		/* ===== EMPTY STATE ===== */
+		.empty-state {
+			text-align: center;
+			padding: 3rem 1rem;
+			color: var(--text-tertiary);
+		}
+
+		.empty-state svg {
+			width: 64px;
+			height: 64px;
+			margin-bottom: 1rem;
+			opacity: 0.5;
+		}
+
+		/* ===== RESPONSIVE ===== */
+		@media (max-width: 1200px) {
+			.grid-2 {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		@media (max-width: 768px) {
+			header .inner {
+				flex-direction: column;
+				gap: 1rem;
+			}
+
+			header nav {
+				width: 100%;
+				flex-wrap: wrap;
+				margin-left: 0;
+			}
+
+			main {
+				padding: 1rem;
+			}
+
+			.controls {
+				flex-direction: column;
+			}
+
+			.control-group {
+				width: 100%;
+			}
+
+			.metrics-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+
+		@media (max-width: 480px) {
+			.metrics-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		/* ===== LOADING ===== */
+		.loading {
+			display: inline-block;
+			width: 1rem;
+			height: 1rem;
+			border: 2px solid var(--border);
+			border-top-color: var(--accent);
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+		}
+
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+
+		/* ===== SECTION SPACING ===== */
+		.section {
+			margin-bottom: 2rem;
+		}
+
+		.section:last-child {
+			margin-bottom: 0;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<div class="inner">
+			<div class="logo">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+					<line x1="9" y1="3" x2="9" y2="21"></line>
+					<line x1="15" y1="3" x2="15" y2="21"></line>
+				</svg>
+				Report Toys Pro
+			</div>
+			<nav>
+				<a href="/">Role Selection</a>
+				<a href="/collector.html">Collector</a>
+				<a href="/admin.html">Original</a>
+				<a href="/admin_variant_a.html">Variant A</a>
+				<a href="/admin_variant_b.html">Variant B</a>
+				<label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-tertiary); font-size: 0.9rem;">
+					<input type="checkbox" id="demoToggle" style="width: auto; padding: 0; width: 16px; height: 16px; cursor: pointer;">
+					Demo
+				</label>
+			</nav>
+		</div>
+	</header>
+
+	<main>
+		<!-- KPI Metrics -->
+		<section class="section">
+			<div class="metrics-grid">
+				<div class="metric-card">
+					<div class="metric-content">
+						<div class="metric-value" id="totalRevenue">0 ₴</div>
+						<div class="metric-label">Total Revenue</div>
+					</div>
+				</div>
+				<div class="metric-card">
+					<div class="metric-content">
+						<div class="metric-value" id="collectionsTotal">0</div>
+						<div class="metric-label">Collections</div>
+					</div>
+				</div>
+				<div class="metric-card">
+					<div class="metric-content">
+						<div class="metric-value" id="pointsTotal">0</div>
+						<div class="metric-label">Points</div>
+					</div>
+				</div>
+				<div class="metric-card">
+					<div class="metric-content">
+						<div class="metric-value" id="machinesTotal">0</div>
+						<div class="metric-label">Machines</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Controls -->
+		<section class="section">
+			<div class="controls">
+				<div class="control-group">
+					<label class="control-label">Point</label>
+					<select id="pointSelect">
+						<option value="all">All Points</option>
+					</select>
+				</div>
+				<div class="control-group">
+					<label class="control-label">Machine</label>
+					<select id="machineSelect">
+						<option value="all">All Machines</option>
+					</select>
+				</div>
+				<div class="control-group">
+					<label class="control-label">Period</label>
+					<select id="periodSelect">
+						<option value="7">7 Days</option>
+						<option value="14">14 Days</option>
+						<option value="30">30 Days</option>
+						<option value="90">90 Days</option>
+						<option value="365">1 Year</option>
+						<option value="all">All Time</option>
+					</select>
+				</div>
+				<div class="control-group">
+					<label class="control-label">Interval</label>
+					<select id="intervalSelect">
+						<option value="day">By Day</option>
+						<option value="week">By Week</option>
+						<option value="month">By Month</option>
+					</select>
+				</div>
+				<div class="control-group" style="margin-top: auto;">
+					<div class="range-buttons">
+						<button class="range-btn active" data-days="7">7D</button>
+						<button class="range-btn" data-days="14">14D</button>
+						<button class="range-btn" data-days="30">30D</button>
+						<button class="range-btn" data-days="90">90D</button>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Main Charts -->
+		<section class="section grid-2">
+			<div class="card">
+				<div class="card-header">
+					<h2>Revenue Trend</h2>
+					<span class="stat-pill blue">Last 30 days</span>
+				</div>
+				<div class="chart-container">
+					<canvas id="revenueChart"></canvas>
+				</div>
+			</div>
+			<div class="card">
+				<div class="card-header">
+					<h2>Collections</h2>
+					<span class="stat-pill cyan">Activity</span>
+				</div>
+				<div class="chart-container">
+					<canvas id="collectionsChart"></canvas>
+				</div>
+			</div>
+		</section>
+
+		<!-- Current Selection Info -->
+		<section class="section">
+			<div class="card">
+				<div class="card-header">
+					<h2>Current Selection</h2>
+				</div>
+				<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+					<div>
+						<div class="metric-label">Selected Point</div>
+						<div style="font-size: 1.2rem; font-weight: 600; margin-top: 0.5rem;" id="selectedPoint">All Points</div>
+					</div>
+					<div>
+						<div class="metric-label">Selected Machine</div>
+						<div style="font-size: 1.2rem; font-weight: 600; margin-top: 0.5rem;" id="selectedMachine">All Machines</div>
+					</div>
+					<div>
+						<div class="metric-label">Period Selected</div>
+						<div style="font-size: 1.2rem; font-weight: 600; margin-top: 0.5rem;" id="selectedPeriod">7 Days</div>
+					</div>
+					<div>
+						<div class="metric-label">Last Updated</div>
+						<div style="font-size: 1.2rem; font-weight: 600; margin-top: 0.5rem;" id="lastUpdate">—</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Summary Table -->
+		<section class="section">
+			<div class="card">
+				<div class="card-header">
+					<h2>Summary by Point & Machine</h2>
+					<span class="stat-pill purple">Auto-updated</span>
+				</div>
+				<div class="table-wrapper">
+					<table>
+						<thead>
+							<tr>
+								<th>Point</th>
+								<th>Machine</th>
+								<th>Collections</th>
+								<th>Revenue</th>
+								<th>Items</th>
+								<th>Avg per Collection</th>
+							</tr>
+						</thead>
+						<tbody id="summaryTable">
+							<tr>
+								<td colspan="6" class="empty-state">Loading data...</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</section>
+
+		<!-- Recent Collections -->
+		<section class="section grid-2">
+			<div class="card">
+				<div class="card-header">
+					<h2>Recent Collections</h2>
+					<span class="stat-pill green">Last 10</span>
+				</div>
+				<div id="recentList" class="empty-state">Loading...</div>
+			</div>
+			<div class="card">
+				<div class="card-header">
+					<h2>Machine History</h2>
+					<span class="stat-pill">Detailed</span>
+				</div>
+				<div id="machineLog" class="empty-state">Select a machine to see history</div>
+			</div>
+		</section>
+	</main>
+
+	<script>
+		// ===== DATA MANAGEMENT =====
+		const state = {
+			pointId: 'all',
+			machineId: 'all',
+			days: 7,
+			interval: 'day',
+			allPoints: [],
+			allMachines: [],
+			allCollections: [],
+			charts: {}
+		};
+
+		// ===== DEMO DATA =====
+		function getDemoPoints() {
+			return [
+				{ id: 1, name: 'Point 1' },
+				{ id: 2, name: 'Point 2' },
+				{ id: 3, name: 'Point 3' }
+			];
+		}
+
+		function getDemoMachines(pointId = null) {
+			const all = [
+				{ id: 1, name: 'Machine №1', point_id: 1 },
+				{ id: 2, name: 'Machine №2', point_id: 1 },
+				{ id: 3, name: 'Machine №3', point_id: 2 },
+				{ id: 4, name: 'Machine №4', point_id: 3 },
+				{ id: 5, name: 'Machine №5', point_id: 3 }
+			];
+			if (pointId === 'all') return all;
+			return all.filter(m => String(m.point_id) === String(pointId));
+		}
+
+		function getDemoCollections() {
+			const now = new Date();
+			const data = [];
+			const points = getDemoPoints();
+			const machines = getDemoMachines();
+
+			for (let d = 0; d < 90; d++) {
+				const date = new Date(now);
+				date.setDate(date.getDate() - d);
+				const isActive = Math.random() > 0.3;
+				if (!isActive) continue;
+
+				const machine = machines[Math.floor(Math.random() * machines.length)];
+				const point = points.find(p => p.id === machine.point_id);
+				const amount = Math.floor(Math.random() * 2000) + 500;
+				const quantity = Math.floor(Math.random() * 20) + 5;
+
+				data.push({
+					id: d,
+					created_at: date.toISOString(),
+					amount,
+					quantity,
+					point_id: point.id,
+					machine_id: machine.id,
+					point_name: point.name,
+					machine_name: machine.name,
+					collector: 'Demo Collector',
+					comment: 'Demo collection'
+				});
+			}
+
+			return data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+		}
+
+		// ===== API CALLS =====
+		async function fetchJson(url) {
+			try {
+				const response = await fetch(url);
+				if (!response.ok) {
+					const useDemo = localStorage.getItem('useDemo') === '1';
+					if (url.includes('/api/points') && useDemo) return getDemoPoints();
+					if (url.includes('/api/machines') && useDemo) {
+						const pointId = new URL(url, window.location).searchParams.get('pointId') || 'all';
+						return getDemoMachines(pointId);
+					}
+					if (url.includes('/api/collections') && useDemo) return getDemoCollections();
+					return [];
+				}
+				return response.json();
+			} catch (e) {
+				console.warn('Fetch error, using demo data:', e);
+				if (url.includes('/api/points')) return getDemoPoints();
+				if (url.includes('/api/machines')) return getDemoMachines();
+				if (url.includes('/api/collections')) return getDemoCollections();
+				return [];
+			}
+		}
+
+		// ===== INITIALIZATION =====
+		async function init() {
+			try {
+				// Load points
+				state.allPoints = await fetchJson('/api/points');
+				if (!Array.isArray(state.allPoints)) state.allPoints = getDemoPoints();
+
+				// Load all machines
+				state.allMachines = await fetchJson('/api/machines');
+				if (!Array.isArray(state.allMachines)) state.allMachines = getDemoMachines();
+
+				// Load collections
+				state.allCollections = await fetchJson('/api/collections');
+				if (!Array.isArray(state.allCollections)) state.allCollections = getDemoCollections();
+
+				// Populate dropdowns
+				populateSelects();
+
+				// Setup charts
+				setupCharts();
+
+				// Setup event listeners
+				setupEventListeners();
+
+				// Initial render
+				await updateDashboard();
+			} catch (error) {
+				console.error('Init error:', error);
+				document.body.innerHTML += `<div style="position: fixed; bottom: 20px; left: 20px; background: #ef4444; color: white; padding: 1rem; border-radius: 8px;">Error: ${error.message}</div>`;
+			}
+		}
+
+		function populateSelects() {
+			// Points
+			const pointSelect = document.getElementById('pointSelect');
+			state.allPoints.forEach(point => {
+				const option = document.createElement('option');
+				option.value = point.id;
+				option.textContent = point.name;
+				pointSelect.appendChild(option);
+			});
+
+			// Machines
+			const machineSelect = document.getElementById('machineSelect');
+			state.allMachines.forEach(machine => {
+				const option = document.createElement('option');
+				option.value = machine.id;
+				option.textContent = machine.name;
+				machineSelect.appendChild(option);
+			});
+
+			// Update machine count
+			document.getElementById('machinesTotal').textContent = state.allMachines.length;
+			document.getElementById('pointsTotal').textContent = state.allPoints.length;
+		}
+
+		function setupCharts() {
+			const chartConfig = {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						display: false
+					},
+					filler: {
+						propagate: true
+					}
+				},
+				interaction: {
+					intersect: false,
+					mode: 'index'
+				},
+				scales: {
+					x: {
+						grid: {
+							color: 'rgba(255, 255, 255, 0.05)',
+							drawBorder: false
+						},
+						ticks: {
+							color: 'rgba(255, 255, 255, 0.5)',
+							font: {
+								size: 12
+							}
+						}
+					},
+					y: {
+						grid: {
+							color: 'rgba(255, 255, 255, 0.05)',
+							drawBorder: false
+						},
+						ticks: {
+							color: 'rgba(255, 255, 255, 0.5)',
+							font: {
+								size: 12
+							}
+						}
+					}
+				}
+			};
+
+			// Revenue Chart
+			const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+			state.charts.revenue = new Chart(revenueCtx, {
+				type: 'line',
+				data: {
+					labels: [],
+					datasets: [{
+						label: 'Revenue',
+						data: [],
+						borderColor: '#3b82f6',
+						backgroundColor: 'rgba(59, 130, 246, 0.1)',
+						borderWidth: 2,
+						fill: true,
+						pointRadius: 4,
+						pointBackgroundColor: '#3b82f6',
+						pointHoverRadius: 6,
+						tension: 0.4
+					}]
+				},
+				options: chartConfig
+			});
+
+			// Collections Chart
+			const collectionsCtx = document.getElementById('collectionsChart').getContext('2d');
+			state.charts.collections = new Chart(collectionsCtx, {
+				type: 'bar',
+				data: {
+					labels: [],
+					datasets: [{
+						label: 'Collections',
+						data: [],
+						backgroundColor: '#06b6d4',
+						borderColor: '#06b6d4',
+						borderWidth: 0,
+						borderRadius: 6
+					}]
+				},
+				options: chartConfig
+			});
+		}
+
+		function setupEventListeners() {
+			document.getElementById('pointSelect').addEventListener('change', (e) => {
+				state.pointId = e.target.value;
+				updateDashboard();
+			});
+
+			document.getElementById('machineSelect').addEventListener('change', (e) => {
+				state.machineId = e.target.value;
+				updateDashboard();
+			});
+
+			document.getElementById('periodSelect').addEventListener('change', (e) => {
+				const map = { '7': 7, '14': 14, '30': 30, '90': 90, '365': 365, 'all': 9999 };
+				state.days = map[e.target.value] || 7;
+				updateDashboard();
+			});
+
+			document.getElementById('intervalSelect').addEventListener('change', (e) => {
+				state.interval = e.target.value;
+				updateDashboard();
+			});
+
+			document.querySelectorAll('.range-btn').forEach(btn => {
+				btn.addEventListener('click', () => {
+					document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+					btn.classList.add('active');
+					state.days = Number(btn.dataset.days);
+					updateDashboard();
+				});
+			});
+
+			document.getElementById('demoToggle').addEventListener('change', (e) => {
+				localStorage.setItem('useDemo', e.target.checked ? '1' : '0');
+			});
+
+			document.getElementById('demoToggle').checked = localStorage.getItem('useDemo') === '1';
+		}
+
+		function filterData() {
+			return state.allCollections.filter(item => {
+				const pointMatch = state.pointId === 'all' || String(item.point_id) === String(state.pointId);
+				const machineMatch = state.machineId === 'all' || String(item.machine_id) === String(state.machineId);
+				const now = new Date();
+				const dateMatch = new Date(item.created_at) > new Date(now.getTime() - state.days * 24 * 60 * 60 * 1000);
+				return pointMatch && machineMatch && dateMatch;
+			});
+		}
+
+		function aggregateByInterval(items) {
+			const map = {};
+			items.forEach(item => {
+				const date = new Date(item.created_at);
+				let key;
+				if (state.interval === 'day') {
+					key = date.toISOString().split('T')[0];
+				} else if (state.interval === 'week') {
+					const d = new Date(date);
+					const weekStart = new Date(d.setDate(d.getDate() - d.getDay()));
+					key = weekStart.toISOString().split('T')[0];
+				} else {
+					key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+				}
+
+				if (!map[key]) {
+					map[key] = { revenue: 0, count: 0, date: new Date(key) };
+				}
+				map[key].revenue += Number(item.amount || 0);
+				map[key].count += 1;
+			});
+
+			return Object.entries(map)
+				.map(([key, val]) => ({ ...val, key }))
+				.sort((a, b) => a.date - b.date);
+		}
+
+		function formatLabel(dateStr, interval) {
+			const date = new Date(dateStr);
+			if (interval === 'day') {
+				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+			} else if (interval === 'week') {
+				const end = new Date(date);
+				end.setDate(end.getDate() + 6);
+				return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+			} else {
+				return date.toLocaleDateString('en-US', { month: 'long', year: '2-digit' });
+			}
+		}
+
+		async function updateDashboard() {
+			const filtered = filterData();
+
+			// Update KPIs
+			const totalRevenue = filtered.reduce((s, i) => s + Number(i.amount || 0), 0);
+			document.getElementById('totalRevenue').textContent = `${totalRevenue.toLocaleString()} ₴`;
+			document.getElementById('collectionsTotal').textContent = filtered.length;
+
+			// Update selection info
+			const pointName = state.pointId === 'all' ? 'All Points' : state.allPoints.find(p => p.id == state.pointId)?.name || 'Unknown';
+			const machineName = state.machineId === 'all' ? 'All Machines' : state.allMachines.find(m => m.id == state.machineId)?.name || 'Unknown';
+			document.getElementById('selectedPoint').textContent = pointName;
+			document.getElementById('selectedMachine').textContent = machineName;
+			document.getElementById('selectedPeriod').textContent = state.days === 9999 ? 'All Time' : `${state.days} Days`;
+			document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+			// Update charts
+			const aggregated = aggregateByInterval(filtered);
+			state.charts.revenue.data.labels = aggregated.map(d => formatLabel(d.key, state.interval));
+			state.charts.revenue.data.datasets[0].data = aggregated.map(d => d.revenue);
+			state.charts.revenue.update();
+
+			state.charts.collections.data.labels = aggregated.map(d => formatLabel(d.key, state.interval));
+			state.charts.collections.data.datasets[0].data = aggregated.map(d => d.count);
+			state.charts.collections.update();
+
+			// Update summary table
+			updateSummaryTable(filtered);
+
+			// Update recent list
+			updateRecentList(filtered);
+
+			// Update machine log
+			updateMachineLog();
+		}
+
+		function updateSummaryTable(items) {
+			if (items.length === 0) {
+				document.getElementById('summaryTable').innerHTML = '<tr><td colspan="6" class="empty-state">No data</td></tr>';
+				return;
+			}
+
+			const grouped = {};
+			items.forEach(item => {
+				const key = `${item.point_name}|${item.machine_name}`;
+				if (!grouped[key]) {
+					grouped[key] = {
+						point: item.point_name,
+						machine: item.machine_name,
+						collections: 0,
+						revenue: 0,
+						items: 0
+					};
+				}
+				grouped[key].collections += 1;
+				grouped[key].revenue += Number(item.amount || 0);
+				grouped[key].items += Number(item.quantity || 0);
+			});
+
+			const html = Object.values(grouped)
+				.sort((a, b) => b.revenue - a.revenue)
+				.map(g => `
+					<tr>
+						<td>${g.point}</td>
+						<td>${g.machine}</td>
+						<td>${g.collections}</td>
+						<td>${g.revenue.toLocaleString()} ₴</td>
+						<td>${g.items}</td>
+						<td>${(g.revenue / g.collections).toLocaleString('en-US', { maximumFractionDigits: 2 })} ₴</td>
+					</tr>
+				`)
+				.join('');
+
+			document.getElementById('summaryTable').innerHTML = html;
+		}
+
+		function updateRecentList(items) {
+			if (items.length === 0) {
+				document.getElementById('recentList').innerHTML = '<div class="empty-state">No collections</div>';
+				return;
+			}
+
+			const html = items.slice(0, 10).map(item => `
+				<div style="padding: 1rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start;">
+					<div>
+						<div style="color: var(--text-primary); font-weight: 500;">${new Date(item.created_at).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
+						<div style="color: var(--text-tertiary); font-size: 0.9rem;">${item.point_name} / ${item.machine_name}</div>
+						<div style="color: var(--text-tertiary); font-size: 0.85rem; margin-top: 0.25rem;">${item.collector}</div>
+					</div>
+					<div style="text-align: right; font-weight: 600; color: var(--accent);">${item.amount} ₴</div>
+				</div>
+			`).join('');
+
+			document.getElementById('recentList').innerHTML = html;
+		}
+
+		function updateMachineLog() {
+			if (state.machineId === 'all') {
+				document.getElementById('machineLog').innerHTML = '<div class="empty-state">Select a specific machine</div>';
+				return;
+			}
+
+			const items = state.allCollections.filter(i => String(i.machine_id) === String(state.machineId));
+			if (items.length === 0) {
+				document.getElementById('machineLog').innerHTML = '<div class="empty-state">No data for this machine</div>';
+				return;
+			}
+
+			const html = items.slice(0, 10).map(item => `
+				<div style="padding: 1rem 0; border-bottom: 1px solid var(--border);">
+					<div style="color: var(--text-primary); font-weight: 500;">${new Date(item.created_at).toLocaleString('en-US')}</div>
+					<div style="color: var(--text-tertiary); font-size: 0.9rem; margin-top: 0.25rem;">${item.point_name} · ${item.amount} ₴ · ${item.quantity} items</div>
+					<div style="color: var(--text-tertiary); font-size: 0.85rem; margin-top: 0.25rem;">${item.collector}</div>
+				</div>
+			`).join('');
+
+			document.getElementById('machineLog').innerHTML = html;
+		}
+
+		// Start
+		init();
+	</script>
+</body>
+</html>
