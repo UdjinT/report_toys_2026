@@ -1,4 +1,4 @@
-import { handleTelegramUpdate } from './telegram.ts';
+import { handleTelegramBot } from './bot';
 
 export interface Env {
   D1_REPORT_TOYS: D1Database;
@@ -53,19 +53,15 @@ export default {
 
     // Handle Telegram webhook
     if (pathname === '/webhook/telegram') {
-      console.log('🔔 Webhook path matched, method:', request.method);
       if (request.method === 'POST') {
         try {
           const body = await request.json();
-          console.log('✅ TG update parsed:', JSON.stringify(body).substring(0, 200));
-          await handleTelegramUpdate(body, env.TG_BOT_TOKEN);
-          console.log('✅ Update handled');
+          await handleTelegramBot(body, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
         } catch (e) {
           console.error('❌ Telegram error:', e);
         }
         return new Response('OK');
       } else {
-        console.log('⚠️ Non-POST request to webhook');
         return new Response('OK');
       }
     }

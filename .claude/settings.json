@@ -47,7 +47,9 @@
       "Bash(curl -s -X POST \"https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/getUpdates\")",
       "Bash(git add *)",
       "Bash(curl -s https://report-toys-2026.evtsarenko.workers.dev/test)",
-      "Bash(curl -s -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/setWebhook -H 'Content-Type: application/json' -d '{\"url\":\"https://report-toys-2026.evtsarenko.workers.dev/webhook/telegram\",\"allowed_updates\":[\"message\",\"callback_query\"]}')"
+      "Bash(curl -s -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/setWebhook -H 'Content-Type: application/json' -d '{\"url\":\"https://report-toys-2026.evtsarenko.workers.dev/webhook/telegram\",\"allowed_updates\":[\"message\",\"callback_query\"]}')",
+      "Bash(node /Users/dees531/Documents/Report_toys/bot.js)",
+      "Bash(pkill -f \"node /Users/dees531/Documents/Report_toys/bot.js\")"
     ]
   }
 }
