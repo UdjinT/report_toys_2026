@@ -23,14 +23,19 @@ export { debugLogs };
 export async function handleTelegramBot(update: any, db: any, token: string) {
   try {
     addLog('🤖 TG Update: ' + update.update_id);
+    addLog('📨 Update data: ' + JSON.stringify(update).substring(0, 200));
 
     const message = update.message;
     const callbackQuery = update.callback_query;
 
     if (message) {
+      addLog('✅ Has message, calling handleMessage');
       await handleMessage(message, db, token);
     } else if (callbackQuery) {
+      addLog('✅ Has callback_query, calling handleCallback');
       await handleCallback(callbackQuery, db, token);
+    } else {
+      addLog('⚠️ No message or callback_query found');
     }
   } catch (error) {
     addLog('❌ Bot error: ' + String(error));
