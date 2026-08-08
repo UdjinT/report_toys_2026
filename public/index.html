@@ -27,6 +27,25 @@
 			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
 			background-attachment: fixed !important;
 		}
+		/* Glassmorphism cards for dark theme */
+		body[data-bs-theme="dark"] .card {
+			background: rgba(255, 255, 255, 0.08) !important;
+			backdrop-filter: blur(10px) !important;
+			border: 1px solid rgba(255, 255, 255, 0.15) !important;
+		}
+		body[data-bs-theme="dark"] .card-header {
+			background: rgba(255, 255, 255, 0.05) !important;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+		}
+		body[data-bs-theme="dark"] .page-header {
+			color: white !important;
+		}
+		body[data-bs-theme="dark"] .page-title {
+			color: white !important;
+		}
+		body[data-bs-theme="dark"] .text-muted {
+			color: rgba(255, 255, 255, 0.7) !important;
+		}
 		.page-wrapper {
 			padding: 1.5rem 0;
 		}
@@ -43,10 +62,17 @@
 			font-size: 1.75rem;
 			font-weight: 700;
 			margin-bottom: 0.25rem;
+			color: white;
+		}
+		body[data-bs-theme="dark"] .stat-value {
+			color: white !important;
 		}
 		.stat-label {
 			font-size: 0.85rem;
 			color: var(--bs-gray-600);
+		}
+		body[data-bs-theme="dark"] .stat-label {
+			color: rgba(255, 255, 255, 0.7) !important;
 		}
 		.chart-container {
 			position: relative;
@@ -67,15 +93,24 @@
 			color: var(--bs-body-color);
 			font-size: 0.95rem;
 		}
+		body[data-bs-theme="dark"] .list-time {
+			color: white !important;
+		}
 		.list-details {
 			color: var(--bs-gray-600);
 			font-size: 0.875rem;
 			margin-top: 0.25rem;
 		}
+		body[data-bs-theme="dark"] .list-details {
+			color: rgba(255, 255, 255, 0.6) !important;
+		}
 		.list-amount {
 			font-weight: 700;
 			color: #198754;
 			font-size: 1rem;
+		}
+		body[data-bs-theme="dark"] .list-amount {
+			color: #4ade80 !important;
 		}
 		.status-badge {
 			display: inline-flex;
