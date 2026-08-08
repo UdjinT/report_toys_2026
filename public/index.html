@@ -909,29 +909,33 @@
 				log(`Point is ${pointId}, filtered machines:`, filteredMachines);
 			}
 
-			// Сохраняем текущее значение перед перестройкой
-			const savedMachineId = state.machineId;
+			// Сохраняем текущее значение
+			const currentSelectedValue = machineSelect.value;
+			log(`Current selected value before update: ${currentSelectedValue}`);
 
-			// Перестраиваем селект
+			// Полностью перестраиваем селект
 			machineSelect.innerHTML = '<option value="all">Все автоматы</option>';
 			filteredMachines.forEach(machine => {
-				log(`  Adding machine: ${machine.id} = ${machine.name} (point_id: ${machine.point_id})`);
+				log(`  Adding machine: ${machine.id} = ${machine.name}`);
 				const option = document.createElement('option');
 				option.value = machine.id;
 				option.textContent = machine.name;
 				machineSelect.appendChild(option);
 			});
 
-			// Восстанавливаем выбор если он еще валидный
-			if (savedMachineId !== 'all' && filteredMachines.find(m => String(m.id) === String(savedMachineId))) {
-				machineSelect.value = savedMachineId;
-				state.machineId = savedMachineId;
-				log(`✓ Restored machine selection: ${savedMachineId}`);
+			// Пытаемся восстановить выбор машины
+			const machineExists = filteredMachines.find(m => String(m.id) === String(currentSelectedValue));
+			if (machineExists && currentSelectedValue !== 'all') {
+				machineSelect.value = currentSelectedValue;
+				state.machineId = currentSelectedValue;
+				log(`✓ Kept machine selection: ${currentSelectedValue}`);
 			} else {
-				state.machineId = 'all';
 				machineSelect.value = 'all';
-				log(`Reset machine selection to 'all'`);
+				state.machineId = 'all';
+				log(`Reset to all machines`);
 			}
+
+			log(`Machine select value after update: ${machineSelect.value}`);
 		}
 
 		function setupCharts() {
@@ -1025,16 +1029,19 @@
 			}
 
 			document.getElementById('pointSelect').addEventListener('change', (e) => {
-				log(`Point changed to: ${e.target.value}`);
+				log(`🔴 Point changed event - value: ${e.target.value}`);
 				state.pointId = e.target.value;
 				state.machineId = 'all';
+				log(`State updated: pointId=${state.pointId}, machineId=${state.machineId}`);
 				updateMachineSelect();
+				log(`After updateMachineSelect: machineSelect.value=${document.getElementById('machineSelect').value}`);
 				updateDashboard();
 			});
 
 			document.getElementById('machineSelect').addEventListener('change', (e) => {
-				log(`Machine changed to: ${e.target.value}`);
+				log(`🔴 Machine changed event - value: ${e.target.value}`);
 				state.machineId = e.target.value;
+				log(`State.machineId updated to: ${state.machineId}`);
 				updateDashboard();
 			});
 
