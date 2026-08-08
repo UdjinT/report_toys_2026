@@ -4,6 +4,12 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Report Toys — Админ Панель</title>
+	<script>
+		// Restore theme immediately before page loads to prevent flashing
+		const savedTheme = localStorage.getItem('theme') || 'light';
+		document.documentElement.setAttribute('data-bs-theme', savedTheme);
+		document.body.setAttribute('data-bs-theme', savedTheme);
+	</script>
 	<link href="/assets/css/tabler.min.css" rel="stylesheet" />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
