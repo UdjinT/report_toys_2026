@@ -133,6 +133,31 @@ export default {
       }
     }
 
+    if (pathname === '/bot/updates' && request.method === 'GET') {
+      try {
+        const offset = new URL(request.url).searchParams.get('offset') || '0';
+        const url = `https://api.telegram.org/bot${env.TG_BOT_TOKEN}/getUpdates?offset=${offset}&timeout=1&allowed_updates=message,callback_query`;
+
+        const response = await fetch(url);
+        const result = await response.json() as any;
+
+        if (result.ok && result.result && result.result.length > 0) {
+          for (const update of result.result) {
+            await handleTelegramBot(update, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
+          }
+        }
+
+        return new Response(JSON.stringify({ ok: true, count: result.result?.length || 0 }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     return serveStatic(request, env);
   }
 };
