@@ -1584,7 +1584,7 @@
 			while (machineSelect.options.length > 1) machineSelect.remove(1);
 			while (collectorSelect.options.length > 1) collectorSelect.remove(1);
 
-			// Add point options
+			// Add point options from ALL machines (not just filtered)
 			const uniquePoints = [...new Set(state.allMachines.map(m => m.point_id))];
 			uniquePoints.sort((a, b) => a - b).forEach(pid => {
 				const point = state.allPoints.find(p => p.id === pid);
@@ -1596,10 +1596,10 @@
 				}
 			});
 
-			// Add machine options
-			const uniqueMachines = [...new Set(filtered.map(c => c.machine_id))];
+			// Add machine options from ALL collections (not just filtered)
+			const uniqueMachines = [...new Set(state.allCollections.map(c => c.machine_id))];
 			uniqueMachines.sort((a, b) => a - b).forEach(mid => {
-				const machine = filtered.find(c => c.machine_id === mid);
+				const machine = state.allCollections.find(c => c.machine_id === mid);
 				if (machine) {
 					const opt = document.createElement('option');
 					opt.value = mid;
@@ -1608,8 +1608,8 @@
 				}
 			});
 
-			// Add collector options
-			const uniqueCollectors = [...new Set(filtered.map(c => c.collector))];
+			// Add collector options from ALL collections (not just filtered)
+			const uniqueCollectors = [...new Set(state.allCollections.map(c => c.collector))];
 			uniqueCollectors.sort().forEach(collector => {
 				const opt = document.createElement('option');
 				opt.value = collector;
