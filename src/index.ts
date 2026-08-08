@@ -81,6 +81,33 @@ export default {
       });
     }
 
+    if (pathname === '/setup/webhook' && request.method === 'POST') {
+      try {
+        const webhookUrl = `https://${new URL(request.url).host}/webhook/telegram`;
+        const setupUrl = `https://api.telegram.org/bot${env.TG_BOT_TOKEN}/setWebhook?url=${encodeURIComponent(webhookUrl)}`;
+
+        const response = await fetch(setupUrl);
+        const result = await response.json() as any;
+
+        return new Response(JSON.stringify({
+          ok: result.ok,
+          description: result.description,
+          webhook_url: webhookUrl,
+          result: result.result
+        }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({
+          ok: false,
+          error: String(e)
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     if (pathname === '/test/webhook' && request.method === 'POST') {
       try {
         debugLogs.length = 0; // Clear previous logs
