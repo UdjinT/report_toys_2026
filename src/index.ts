@@ -1,8 +1,21 @@
 import { handleTelegramBot, debugLogs } from './bot';
+import {
+  hashPassword,
+  verifyPassword,
+  generateSessionToken,
+  createSessionCookie,
+  verifySessionCookie,
+  parseCookies,
+  createLoginResponse,
+  createSuccessResponse,
+  createLogoutResponse,
+} from './auth';
 
 export interface Env {
   D1_REPORT_TOYS: D1Database;
   TG_BOT_TOKEN: string;
+  ADMIN_PASSWORD_HASH: string;
+  SESSION_SECRET: string;
   __STATIC_CONTENT: {
     fetch(request: Request): Promise<Response>;
   };
@@ -101,6 +114,26 @@ async function apiHandler(request: Request, env: Env) {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
+  // ===== AUTH ENDPOINTS (PUBLIC) =====
+  if (pathname === '/api/auth/login' && request.method === 'POST') {
+    return handleLogin(request, env);
+  }
+
+  if (pathname === '/api/auth/logout' && request.method === 'POST') {
+    return createLogoutResponse();
+  }
+
+  if (pathname === '/api/auth/me') {
+    return handleAuthMe(request, env);
+  }
+
+  // ===== PROTECTED ENDPOINTS (require auth) =====
+  const isAuthenticated = await checkAuth(request, env);
+  if (!isAuthenticated) {
+    return createLoginResponse('Unauthorized', 401);
+  }
+
+  // Public data endpoints (but protected)
   if (pathname === '/api/points') {
     const result = await env.D1_REPORT_TOYS.prepare('SELECT * FROM points ORDER BY name').all();
     return new Response(JSON.stringify(result.results || []), {
@@ -149,6 +182,71 @@ async function apiHandler(request: Request, env: Env) {
   }
 
   return new Response('Not found', { status: 404 });
+}
+
+// ===== AUTH HELPERS =====
+async function checkAuth(request: Request, env: Env): Promise<boolean> {
+  if (!env.SESSION_SECRET) {
+    console.error('❌ SESSION_SECRET not set');
+    return false;
+  }
+
+  const cookieHeader = request.headers.get('cookie') || '';
+  const cookies = parseCookies(cookieHeader);
+  const sessionCookie = cookies.session;
+
+  if (!sessionCookie) {
+    return false;
+  }
+
+  const isValid = await verifySessionCookie(sessionCookie, env.SESSION_SECRET);
+  return !!isValid;
+}
+
+async function handleLogin(request: Request, env: Env): Promise<Response> {
+  if (!env.ADMIN_PASSWORD_HASH || !env.SESSION_SECRET) {
+    console.error('❌ Missing auth config: ADMIN_PASSWORD_HASH or SESSION_SECRET');
+    return createLoginResponse('Server configuration error', 500);
+  }
+
+  try {
+    const body = await request.json() as { password?: string };
+    const password = body.password?.trim();
+
+    if (!password) {
+      return createLoginResponse('Password required');
+    }
+
+    const isValid = await verifyPassword(password, env.ADMIN_PASSWORD_HASH);
+
+    if (!isValid) {
+      return createLoginResponse('Invalid password');
+    }
+
+    // Create session
+    const sessionToken = generateSessionToken();
+    const cookieValue = await createSessionCookie(sessionToken, env.SESSION_SECRET);
+
+    const setCookieHeader = `session=${cookieValue}; Path=/; Max-Age=86400; HttpOnly; Secure; SameSite=Lax`;
+
+    return createSuccessResponse(
+      { message: 'Logged in successfully' },
+      setCookieHeader
+    );
+  } catch (e) {
+    console.error('Login error:', e);
+    return createLoginResponse('Invalid request', 400);
+  }
+}
+
+async function handleAuthMe(request: Request, env: Env): Promise<Response> {
+  const isAuth = await checkAuth(request, env);
+
+  if (!isAuth) {
+    return createLoginResponse('Not authenticated', 401);
+  }
+
+  return createSuccessResponse({ authenticated: true });
 }
 
 async function serveStatic(request: Request, env: Env) {

@@ -77,7 +77,13 @@
       "Bash(curl -X POST https://report_toys_2026.evtsarenko.workers.dev/webhook/telegram -H 'Content-Type: application/json' -d '{\"update_id\": 123, \"message\": {\"message_id\": 1, \"from\": {\"id\": 999}, \"chat\": {\"id\": 999}, \"text\": \"/start\"}}')",
       "Bash(curl -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/setWebhook -H 'Content-Type: application/json' -d '{\"url\": \"https://report_toys_2026.0dc04f0c7b2bafb89ee309f7cd4e9a30.workers.dev/webhook/telegram\"}')",
       "Bash(curl -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/setWebhook -H 'Content-Type: application/json' -d '{\"url\": \"https://report_toys_2026.workers.dev/webhook/telegram\"}')",
-      "Bash(curl -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/deleteWebhook -H 'Content-Type: application/json' -d '{\"drop_pending_updates\": true}')"
+      "Bash(curl -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/deleteWebhook -H 'Content-Type: application/json' -d '{\"drop_pending_updates\": true}')",
+      "Bash(node /tmp/gen_hash.js)",
+      "Bash(openssl rand *)"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/private/tmp"
     ]
   }
 }

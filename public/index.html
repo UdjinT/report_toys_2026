@@ -1592,8 +1592,48 @@
 			log('✅ Dashboard updated');
 		}
 
-		// Start application
-		init();
+		// ===== AUTH CHECK =====
+		async function checkAuthAndStart() {
+			try {
+				const response = await fetch('/api/auth/me');
+				if (!response.ok) {
+					// Not authenticated, redirect to login
+					window.location.href = '/login.html';
+					return;
+				}
+				// Authenticated, start app
+				init();
+			} catch (e) {
+				console.error('Auth check failed:', e);
+				window.location.href = '/login.html';
+			}
+		}
+
+		// Add logout button
+		document.addEventListener('DOMContentLoaded', () => {
+			const navbar = document.querySelector('.navbar');
+			if (navbar) {
+				const logoutBtn = document.createElement('a');
+				logoutBtn.href = '#';
+				logoutBtn.className = 'btn btn-outline-danger btn-sm ml-auto';
+				logoutBtn.textContent = '🚪 Выход';
+				logoutBtn.style.marginLeft = 'auto';
+				logoutBtn.onclick = async (e) => {
+					e.preventDefault();
+					try {
+						await fetch('/api/auth/logout', { method: 'POST' });
+						window.location.href = '/login.html';
+					} catch (err) {
+						console.error('Logout error:', err);
+						window.location.href = '/login.html';
+					}
+				};
+				navbar.appendChild(logoutBtn);
+			}
+		});
+
+		// Start application after auth check
+		checkAuthAndStart();
 	</script>
 </body>
 </html>
