@@ -251,6 +251,9 @@
 						<h2 class="page-title">Dashboard</h2>
 						<p class="text-muted" style="margin-top: 0.25rem;">Полный контроль над точками, автоматами и инкассациями</p>
 					</div>
+					<div class="col-auto">
+						<button id="logoutBtn" class="btn btn-outline-danger btn-sm">🚪 Выход</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -1611,6 +1614,7 @@
 					return;
 				}
 				// Authenticated, start app
+				setupLogout();
 				init();
 			} catch (e) {
 				console.error('Auth check failed:', e);
@@ -1618,15 +1622,10 @@
 			}
 		}
 
-		// Add logout button
-		document.addEventListener('DOMContentLoaded', () => {
-			const navbar = document.querySelector('.navbar');
-			if (navbar) {
-				const logoutBtn = document.createElement('a');
-				logoutBtn.href = '#';
-				logoutBtn.className = 'btn btn-outline-danger btn-sm ml-auto';
-				logoutBtn.textContent = '🚪 Выход';
-				logoutBtn.style.marginLeft = 'auto';
+		// Setup logout button
+		function setupLogout() {
+			const logoutBtn = document.getElementById('logoutBtn');
+			if (logoutBtn) {
 				logoutBtn.onclick = async (e) => {
 					e.preventDefault();
 					try {
@@ -1637,9 +1636,8 @@
 						window.location.href = '/login.html';
 					}
 				};
-				navbar.appendChild(logoutBtn);
 			}
-		});
+		}
 
 		// Start application after auth check
 		checkAuthAndStart();
