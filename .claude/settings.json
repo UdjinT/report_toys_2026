@@ -68,7 +68,16 @@
       "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=toys_report-2026&password=password123' -i)",
       "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=toys_report-2026&password=test123' -i)",
       "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/login -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=toys_report-2026&password=test123' -i)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(curl -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/setWebhook -H 'Content-Type: application/json' -d '{\"url\": \"https://report_toys_2026.evtsarenko.workers.dev/webhook/telegram\"}')",
+      "Bash(cat)",
+      "Bash(curl -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/setWebhook -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(curl -v \"https://report_toys_2026.evtsarenko.workers.dev/webhook/telegram\")",
+      "Bash(curl -X POST https://report_toys_2026.evtsarenko.workers.dev/webhook/telegram -H 'Content-Type: application/json' -d '{\"update_id\": 123, \"message\": {\"message_id\": 1, \"from\": {\"id\": 999}, \"chat\": {\"id\": 999}, \"text\": \"/start\"}}' -v)",
+      "Bash(curl -X POST https://report_toys_2026.evtsarenko.workers.dev/webhook/telegram -H 'Content-Type: application/json' -d '{\"update_id\": 123, \"message\": {\"message_id\": 1, \"from\": {\"id\": 999}, \"chat\": {\"id\": 999}, \"text\": \"/start\"}}')",
+      "Bash(curl -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/setWebhook -H 'Content-Type: application/json' -d '{\"url\": \"https://report_toys_2026.0dc04f0c7b2bafb89ee309f7cd4e9a30.workers.dev/webhook/telegram\"}')",
+      "Bash(curl -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/setWebhook -H 'Content-Type: application/json' -d '{\"url\": \"https://report_toys_2026.workers.dev/webhook/telegram\"}')",
+      "Bash(curl -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/deleteWebhook -H 'Content-Type: application/json' -d '{\"drop_pending_updates\": true}')"
     ]
   }
 }

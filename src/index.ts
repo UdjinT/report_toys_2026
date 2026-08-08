@@ -24,11 +24,10 @@ export default {
       });
     }
 
+    // Root path serves index.html (admin dashboard)
     if (pathname === '/' || pathname === '') {
-      return new Response(null, {
-        status: 302,
-        headers: { 'Location': '/admin.html' }
-      });
+      const indexRequest = new Request(new URL('/index.html', request.url).toString());
+      return serveStatic(indexRequest, env);
     }
 
     if (pathname.startsWith('/api/')) {
