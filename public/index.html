@@ -556,7 +556,7 @@
 									</select>
 								</div>
 							</div>
-							<div id="recentList" style="color: var(--bs-gray-600); text-align: center; padding: 2rem 0;">Загрузка...</div>
+							<div id="recentList" style="color: var(--bs-gray-600); text-align: center; padding: 2rem 0; max-height: 500px; overflow-y: auto;">Загрузка...</div>
 						</div>
 					</div>
 				</div>
@@ -1681,7 +1681,7 @@
 			}
 
 			// Recent collections - display with select filtering applied
-			const recentDisplay = recentFiltered.slice(0, 10);
+			const recentDisplay = recentFiltered.slice(0, 50);
 
 			if (recentDisplay.length === 0) {
 				document.getElementById('recentList').innerHTML = '<div style="color: var(--bs-gray-600); text-align: center; padding: 2rem;">Нет инкассаций</div>';
