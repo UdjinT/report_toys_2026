@@ -27,7 +27,8 @@
 			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
 			background-attachment: fixed !important;
 		}
-		/* Glassmorphism cards for dark theme */
+		/* ===== ТОЛЬКО ДЛЯ ТЁМНОЙ ТЕМЫ ===== */
+		/* Glassmorphism cards */
 		body[data-bs-theme="dark"] .card {
 			background: rgba(255, 255, 255, 0.08) !important;
 			backdrop-filter: blur(10px) !important;
@@ -45,6 +46,10 @@
 		}
 		body[data-bs-theme="dark"] .text-muted {
 			color: rgba(255, 255, 255, 0.7) !important;
+		}
+		/* СВЕТЛАЯ ТЕМА - НЕ МЕНЯТЬ */
+		body[data-bs-theme="light"] .card {
+			/* остаются обычные стили */
 		}
 		.page-wrapper {
 			padding: 1.5rem 0;
