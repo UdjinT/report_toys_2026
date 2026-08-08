@@ -728,16 +728,17 @@
 		// API communication
 		async function fetchJson(url) {
 			try {
-				log(`Fetch: ${url}`);
-				const response = await fetch(url);
+				const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+				log(`Fetch: ${fullUrl}`);
+				const response = await fetch(fullUrl);
 				if (!response.ok) {
 					throw new Error(`HTTP ${response.status}`);
 				}
 				const data = await response.json();
-				log(`Fetched ${url}: ${data.length || 1} items`);
+				log(`Fetched ${fullUrl}: ${data.length || 1} items`);
 				return data;
 			} catch (e) {
-				log(`Fetch error: ${url}`, e.message);
+				log(`Fetch error:`, e.message);
 				return [];
 			}
 		}

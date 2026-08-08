@@ -4,6 +4,7 @@ account_id = "0dc04f0c7b2bafb89ee309f7cd4e9a30"
 workers_dev = true
 compatibility_date = "2026-07-28"
 assets = { directory = "./public" }
+vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8" }
 
 [[d1_databases]]
 binding = "D1_REPORT_TOYS"
@@ -12,4 +13,4 @@ database_name = "report_toys_2026"
 # database_id = "22ec155c-31da-4c92-97ca-712c20d8f5ef"
 
 [env.production]
-vars = { ADMIN_USERNAME = "toys_report-2026", TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8" }
+vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8" }

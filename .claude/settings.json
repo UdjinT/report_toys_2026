@@ -49,7 +49,26 @@
       "Bash(curl -s https://report-toys-2026.evtsarenko.workers.dev/test)",
       "Bash(curl -s -X POST https://api.telegram.org/bot8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8/setWebhook -H 'Content-Type: application/json' -d '{\"url\":\"https://report-toys-2026.evtsarenko.workers.dev/webhook/telegram\",\"allowed_updates\":[\"message\",\"callback_query\"]}')",
       "Bash(node /Users/dees531/Documents/Report_toys/bot.js)",
-      "Bash(pkill -f \"node /Users/dees531/Documents/Report_toys/bot.js\")"
+      "Bash(pkill -f \"node /Users/dees531/Documents/Report_toys/bot.js\")",
+      "Bash(curl -s -X OPTIONS https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Origin: https://report-toys-2026.evtsarenko.workers.dev' -H 'Access-Control-Request-Method: POST' -v)",
+      "Bash(wrangler deploy *)",
+      "Bash(curl -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Content-Type: application/json' -d '{\"username\":\"toys_report-2026\",\"password\":\"password123\"}' -v)",
+      "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Content-Type: application/json' -d '{\"username\":\"toys_report-2026\",\"password\":\"password123\"}')",
+      "Bash(wrangler tail *)",
+      "Bash(pkill -f \"wrangler tail\")",
+      "Bash(curl -s \"https://report-toys-2026.evtsarenko.workers.dev/test?t=$\\(date +%s\\)\")",
+      "Bash(curl -s \"https://report-toys-2026.evtsarenko.workers.dev/test\")",
+      "Bash(npx tsc *)",
+      "Bash(curl -s -H \"CF-RAY: check-version\" https://report-toys-2026.evtsarenko.workers.dev/test -v)",
+      "Bash(curl -s \"https://report-toys-2026.evtsarenko.workers.dev/test?v=$\\(date +%s%N\\)\")",
+      "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Content-Type: application/json' -d '{\"username\":\"test\",\"password\":\"test\"}')",
+      "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=toys_report-2026&password=password123')",
+      "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login?t=__CMDSUB_OUTPUT__ -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=toys_report-2026&password=password123')",
+      "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=toys_report-2026&password=password123' -L)",
+      "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=toys_report-2026&password=password123' -i)",
+      "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/api/login -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=toys_report-2026&password=test123' -i)",
+      "Bash(curl -s -X POST https://report-toys-2026.evtsarenko.workers.dev/login -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=toys_report-2026&password=test123' -i)",
+      "Bash(git push *)"
     ]
   }
 }
