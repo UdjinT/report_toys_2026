@@ -872,8 +872,10 @@
 		function populatePointSelect() {
 			log('📍 Populating point select');
 			const pointSelect = document.getElementById('pointSelect');
+			const savedPointId = state.pointId; // Сохраняем текущее значение
+
 			pointSelect.innerHTML = '<option value="all">Все точки</option>';
-			
+
 			state.allPoints.forEach(point => {
 				log(`  Adding point: ${point.id} = ${point.name}`);
 				const option = document.createElement('option');
@@ -881,6 +883,12 @@
 				option.textContent = point.name;
 				pointSelect.appendChild(option);
 			});
+
+			// Восстанавливаем выбранное значение
+			if (savedPointId && savedPointId !== 'all') {
+				pointSelect.value = savedPointId;
+				log(`✓ Restored point selection: ${savedPointId}`);
+			}
 
 			document.getElementById('pointsTotal').textContent = state.allPoints.length;
 			document.getElementById('machinesTotal').textContent = state.allMachines.length;
@@ -890,7 +898,7 @@
 			log(`🔄 updateMachineSelect called, state.pointId = ${state.pointId}`);
 			const machineSelect = document.getElementById('machineSelect');
 			const pointId = state.pointId;
-			
+
 			// Фильтруем автоматы по выбранной точке
 			let filteredMachines;
 			if (pointId === 'all') {
@@ -900,6 +908,9 @@
 				filteredMachines = state.allMachines.filter(m => String(m.point_id) === String(pointId));
 				log(`Point is ${pointId}, filtered machines:`, filteredMachines);
 			}
+
+			// Сохраняем текущее значение перед перестройкой
+			const savedMachineId = state.machineId;
 
 			// Перестраиваем селект
 			machineSelect.innerHTML = '<option value="all">Все автоматы</option>';
@@ -911,13 +922,15 @@
 				machineSelect.appendChild(option);
 			});
 
-			// Если был выбран автомат, который не входит в отфильтрованный список, сбрасываем
-			const currentValue = state.machineId;
-			if (currentValue !== 'all' && !filteredMachines.find(m => String(m.id) === String(currentValue))) {
+			// Восстанавливаем выбор если он еще валидный
+			if (savedMachineId !== 'all' && filteredMachines.find(m => String(m.id) === String(savedMachineId))) {
+				machineSelect.value = savedMachineId;
+				state.machineId = savedMachineId;
+				log(`✓ Restored machine selection: ${savedMachineId}`);
+			} else {
 				state.machineId = 'all';
 				machineSelect.value = 'all';
-			} else {
-				machineSelect.value = state.machineId;
+				log(`Reset machine selection to 'all'`);
 			}
 		}
 
