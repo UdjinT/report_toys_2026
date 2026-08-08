@@ -291,7 +291,27 @@ async function saveCollection(chatId: number, userId: number, state: UserState, 
     await sendMessage(chatId, summary, token);
 
     // Keep the name and ask for next point selection
-    await sendMessage(chatId, `\n📍 Готовы к следующей инкассации? Выберите точку:`, token);
+    try {
+      const pointsResult = await db.prepare('SELECT id, name FROM points ORDER BY name').all();
+      const points = pointsResult.results as any[] || [];
+
+      if (points.length > 0) {
+        const keyboard = {
+          inline_keyboard: points.map((p) => [
+            { text: p.name, callback_data: `point_${p.id}` },
+          ]),
+        };
+        await sendMessage(
+          chatId,
+          `📍 Готовы к следующей инкассации? Выберите точку:`,
+          token,
+          keyboard
+        );
+      }
+    } catch (e) {
+      addLog('❌ Error loading points after save: ' + String(e));
+      await sendMessage(chatId, '❌ Ошибка загрузки точек для следующей инкассации', token);
+    }
 
     // Reset state but keep name for next collection
     userStates.set(userId, {
