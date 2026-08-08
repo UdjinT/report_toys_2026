@@ -6,6 +6,9 @@ compatibility_date = "2026-07-28"
 assets = { directory = "./public" }
 vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8" }
 
+[triggers]
+crons = ["*/3 * * * *"]
+
 [[d1_databases]]
 binding = "D1_REPORT_TOYS"
 database_name = "report_toys_2026"
