@@ -1595,10 +1595,16 @@
 			const machineSelect = document.getElementById('recentMachineSelect');
 			const collectorSelect = document.getElementById('recentCollectorSelect');
 
+			// Save current selections before clearing
+			const savedPointValue = pointSelect.value;
+			const savedMachineValue = machineSelect.value;
+			const savedCollectorValue = collectorSelect.value;
+
 			log('DEBUG: pointSelect element:', pointSelect);
 			log('DEBUG: state.allMachines:', state.allMachines);
 			log('DEBUG: state.allCollections:', state.allCollections);
 			log('DEBUG: state.allPoints:', state.allPoints);
+			log(`DEBUG: Saved values - point: ${savedPointValue}, machine: ${savedMachineValue}, collector: ${savedCollectorValue}`);
 
 			// Clear existing options (except first)
 			while (pointSelect.options.length > 1) pointSelect.remove(1);
@@ -1647,6 +1653,20 @@
 			log('DEBUG: pointSelect.options.length:', pointSelect.options.length);
 			log('DEBUG: machineSelect.options.length:', machineSelect.options.length);
 			log('DEBUG: collectorSelect.options.length:', collectorSelect.options.length);
+
+			// Restore saved selections if the option still exists
+			if (savedPointValue && Array.from(pointSelect.options).some(opt => opt.value === savedPointValue)) {
+				pointSelect.value = savedPointValue;
+				log(`Restored point selection: ${savedPointValue}`);
+			}
+			if (savedMachineValue && Array.from(machineSelect.options).some(opt => opt.value === savedMachineValue)) {
+				machineSelect.value = savedMachineValue;
+				log(`Restored machine selection: ${savedMachineValue}`);
+			}
+			if (savedCollectorValue && Array.from(collectorSelect.options).some(opt => opt.value === savedCollectorValue)) {
+				collectorSelect.value = savedCollectorValue;
+				log(`Restored collector selection: ${savedCollectorValue}`);
+			}
 
 			// Apply recent selects filtering
 			const selectedPointId = pointSelect.value;
