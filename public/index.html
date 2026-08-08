@@ -14,6 +14,15 @@
 		}
 		body {
 			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background-attachment: fixed;
+			min-height: 100vh;
+		}
+		body[data-bs-theme="light"] {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		}
+		body[data-bs-theme="dark"] {
+			background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 		}
 		.page-wrapper {
 			padding: 1.5rem 0;
