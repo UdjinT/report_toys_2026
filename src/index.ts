@@ -36,16 +36,25 @@ export default {
     }
 
     if (pathname === '/webhook/telegram' && request.method === 'POST') {
+      console.log('🔔 [WEBHOOK] POST /webhook/telegram received');
       try {
         const body = await request.json();
-        console.log('📨 Telegram webhook received:', body.update_id);
+        console.log('🔔 [WEBHOOK] Parsed JSON:', JSON.stringify(body).substring(0, 200));
+        console.log('🔔 [WEBHOOK] update_id:', body.update_id);
+        console.log('🔔 [WEBHOOK] has message:', !!body.message);
+        console.log('🔔 [WEBHOOK] has callback_query:', !!body.callback_query);
+
         if (!env.TG_BOT_TOKEN) {
-          console.error('❌ TG_BOT_TOKEN not set in env!');
+          console.error('❌ [WEBHOOK] TG_BOT_TOKEN not set in env!');
           return new Response('Error: No token', { status: 500 });
         }
+        console.log('✅ [WEBHOOK] TG_BOT_TOKEN is set');
+
         await handleTelegramBot(body, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
+        console.log('✅ [WEBHOOK] handleTelegramBot completed');
       } catch (e) {
-        console.error('❌ Telegram error:', e);
+        console.error('❌ [WEBHOOK] Telegram error:', e);
+        console.error('❌ [WEBHOOK] Stack:', e instanceof Error ? e.stack : 'no stack');
       }
       return new Response('OK');
     }
