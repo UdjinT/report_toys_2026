@@ -1707,43 +1707,8 @@
 			log('✅ Dashboard updated');
 		}
 
-		// ===== AUTH CHECK =====
-		async function checkAuthAndStart() {
-			try {
-				const response = await fetch('/api/auth/me');
-				if (!response.ok) {
-					// Not authenticated, redirect to login
-					window.location.href = '/login.html';
-					return;
-				}
-				// Authenticated, start app
-				setupLogout();
-				init();
-			} catch (e) {
-				console.error('Auth check failed:', e);
-				window.location.href = '/login.html';
-			}
-		}
-
-		// Setup logout button
-		function setupLogout() {
-			const logoutBtn = document.getElementById('logoutBtn');
-			if (logoutBtn) {
-				logoutBtn.onclick = async (e) => {
-					e.preventDefault();
-					try {
-						await fetch('/api/auth/logout', { method: 'POST' });
-						window.location.href = '/login.html';
-					} catch (err) {
-						console.error('Logout error:', err);
-						window.location.href = '/login.html';
-					}
-				};
-			}
-		}
-
-		// Start application after auth check
-		checkAuthAndStart();
+		// Start application immediately (no auth required)
+		init();
 	</script>
 </body>
 </html>

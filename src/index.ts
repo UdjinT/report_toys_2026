@@ -127,13 +127,7 @@ async function apiHandler(request: Request, env: Env) {
     return handleAuthMe(request, env);
   }
 
-  // ===== PROTECTED ENDPOINTS (require auth) =====
-  const isAuthenticated = await checkAuth(request, env);
-  if (!isAuthenticated) {
-    return createLoginResponse('Unauthorized', 401);
-  }
-
-  // Public data endpoints (but protected)
+  // ===== PUBLIC API ENDPOINTS (no auth required) =====
   if (pathname === '/api/points') {
     const result = await env.D1_REPORT_TOYS.prepare('SELECT * FROM points ORDER BY name').all();
     return new Response(JSON.stringify(result.results || []), {
