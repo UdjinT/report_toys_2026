@@ -1211,18 +1211,22 @@
 
 		function getScaleRange(data) {
 			if (!data || data.length === 0) return { min: 0, max: 100 };
-			const min = Math.min(...data);
 			const max = Math.max(...data);
-			const range = max - min;
-			const padding = range * 0.15;
-			let scaledMin = Math.max(0, min - padding);
-			let scaledMax = max + padding;
+			if (max === 0) return { min: 0, max: 100 };
 
-			// Round to nearest 1000
-			scaledMin = Math.floor(scaledMin / 1000) * 1000;
-			scaledMax = Math.ceil(scaledMax / 1000) * 1000;
+			// Add 20% padding to max value
+			let scaledMax = max * 1.2;
 
-			return { min: scaledMin, max: scaledMax };
+			// Round to nice round number
+			let factor = 1;
+			if (scaledMax > 10000) factor = 1000;
+			else if (scaledMax > 1000) factor = 100;
+			else if (scaledMax > 100) factor = 10;
+			else factor = 5;
+
+			scaledMax = Math.ceil(scaledMax / factor) * factor;
+
+			return { min: 0, max: scaledMax };
 		}
 
 		const colors = [
