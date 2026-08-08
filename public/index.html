@@ -49,16 +49,13 @@
 		body[data-bs-theme="dark"] .text-muted {
 			color: rgba(255, 255, 255, 0.7) !important;
 		}
+		/* Dark theme: force all button text to white */
+		body[data-bs-theme="dark"] * {
+			--bs-btn-color: #ffffff !important;
+		}
 		body[data-bs-theme="dark"] button,
 		body[data-bs-theme="dark"] .btn,
-		body[data-bs-theme="dark"] .btn-outline-primary,
-		body[data-bs-theme="dark"] .btn-outline-secondary,
-		body[data-bs-theme="dark"] .btn-outline-success,
-		body[data-bs-theme="dark"] .btn-outline-danger {
-			color: #ffffff !important;
-		}
-		body[data-bs-theme="dark"] button:not(:disabled),
-		body[data-bs-theme="dark"] .btn:not(:disabled) {
+		body[data-bs-theme="dark"] [class*="btn"] {
 			color: #ffffff !important;
 		}
 		/* ===== СВЕТЛАЯ ТЕМА - LIQUID GLASS APPLE ===== */
