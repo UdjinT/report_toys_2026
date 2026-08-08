@@ -49,13 +49,17 @@
 		body[data-bs-theme="dark"] .text-muted {
 			color: rgba(255, 255, 255, 0.7) !important;
 		}
+		body[data-bs-theme="dark"] button,
 		body[data-bs-theme="dark"] .btn,
 		body[data-bs-theme="dark"] .btn-outline-primary,
 		body[data-bs-theme="dark"] .btn-outline-secondary,
 		body[data-bs-theme="dark"] .btn-outline-success,
-		body[data-bs-theme="dark"] .btn-outline-danger,
-		body[data-bs-theme="dark"] button {
-			color: white !important;
+		body[data-bs-theme="dark"] .btn-outline-danger {
+			color: #ffffff !important;
+		}
+		body[data-bs-theme="dark"] button:not(:disabled),
+		body[data-bs-theme="dark"] .btn:not(:disabled) {
+			color: #ffffff !important;
 		}
 		/* ===== СВЕТЛАЯ ТЕМА - LIQUID GLASS APPLE ===== */
 		body[data-bs-theme="light"] .card {
