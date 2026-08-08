@@ -1166,6 +1166,22 @@
 				document.getElementById('groupPoints').classList.add('btn-outline-primary');
 				updateDashboard();
 			});
+
+			// Event listeners for recent collections filters
+			document.getElementById('recentPointSelect').addEventListener('change', () => {
+				log(`Recent point filter changed to: ${document.getElementById('recentPointSelect').value}`);
+				updateDashboard();
+			});
+
+			document.getElementById('recentMachineSelect').addEventListener('change', () => {
+				log(`Recent machine filter changed to: ${document.getElementById('recentMachineSelect').value}`);
+				updateDashboard();
+			});
+
+			document.getElementById('recentCollectorSelect').addEventListener('change', () => {
+				log(`Recent collector filter changed to: ${document.getElementById('recentCollectorSelect').value}`);
+				updateDashboard();
+			});
 		}
 
 		function filterData() {
@@ -1632,8 +1648,27 @@
 			log('DEBUG: machineSelect.options.length:', machineSelect.options.length);
 			log('DEBUG: collectorSelect.options.length:', collectorSelect.options.length);
 
-			// Recent collections - just display without filtering
-			const recentDisplay = filtered.slice(0, 10);
+			// Apply recent selects filtering
+			const selectedPointId = pointSelect.value;
+			const selectedMachineId = machineSelect.value;
+			const selectedCollector = collectorSelect.value;
+
+			let recentFiltered = filtered;
+			if (selectedPointId) {
+				recentFiltered = recentFiltered.filter(item => String(item.point_id) === String(selectedPointId));
+				log(`Filtered by point ${selectedPointId}: ${recentFiltered.length} items`);
+			}
+			if (selectedMachineId) {
+				recentFiltered = recentFiltered.filter(item => String(item.machine_id) === String(selectedMachineId));
+				log(`Filtered by machine ${selectedMachineId}: ${recentFiltered.length} items`);
+			}
+			if (selectedCollector) {
+				recentFiltered = recentFiltered.filter(item => item.collector === selectedCollector);
+				log(`Filtered by collector ${selectedCollector}: ${recentFiltered.length} items`);
+			}
+
+			// Recent collections - display with select filtering applied
+			const recentDisplay = recentFiltered.slice(0, 10);
 
 			if (recentDisplay.length === 0) {
 				document.getElementById('recentList').innerHTML = '<div style="color: var(--bs-gray-600); text-align: center; padding: 2rem;">Нет инкассаций</div>';
