@@ -46,6 +46,13 @@ async function handleMessage(message: any, db: any, token: string) {
 
   let state = userStates.get(userId);
 
+  // Handle /start command
+  if (text === '/start') {
+    addLog(`🚀 /start command received`);
+    await sendMessage(chatId, '👋 Добро пожаловать! Введите ваше имя (как вы хотите отображаться в системе):', token);
+    return;
+  }
+
   // If no state, initialize with name
   if (!state) {
     state = {
