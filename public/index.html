@@ -536,25 +536,6 @@
 							<h3 class="card-title">Последние инкассации</h3>
 						</div>
 						<div class="card-body">
-							<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
-								<div>
-									<label style="display: block; font-size: 0.75rem; color: var(--bs-gray-600); margin-bottom: 0.25rem;">Точка</label>
-									<select id="recentPointFilter" class="form-control" style="padding: 0.375rem 0.75rem; font-size: 0.875rem; width: 100%;">
-										<option value="">Все точки</option>
-									</select>
-								</div>
-								<div>
-									<label style="display: block; font-size: 0.75rem; color: var(--bs-gray-600); margin-bottom: 0.25rem;">Автомат</label>
-									<select id="recentMachineFilter" class="form-control" style="padding: 0.375rem 0.75rem; font-size: 0.875rem; width: 100%;">
-										<option value="">Все автоматы</option>
-									</select>
-								</div>
-								<div>
-									<label style="display: block; font-size: 0.75rem; color: var(--bs-gray-600); margin-bottom: 0.25rem;">Инкассатор</label>
-									<select id="recentCollectorFilter" class="form-control" style="padding: 0.375rem 0.75rem; font-size: 0.875rem; width: 100%;">
-										<option value="">Все инкассаторы</option>
-									</select>
-								</div>
 							</div>
 							<div id="recentList" style="color: var(--bs-gray-600); text-align: center; padding: 2rem 0;">Загрузка...</div>
 						</div>
@@ -1574,72 +1555,10 @@
 					`).join('');
 			}
 
-			// Recent collections with filters
-			const recentPointFilter = document.getElementById('recentPointFilter').value;
-			const recentMachineFilter = document.getElementById('recentMachineFilter').value;
-			const recentCollectorFilter = document.getElementById('recentCollectorFilter').value;
+			// Recent collections - just display without filtering
+			const recentDisplay = filtered.slice(0, 10);
 
-			let recentFiltered = filtered.filter(item => {
-				if (recentPointFilter && String(item.point_id) !== String(recentPointFilter)) return false;
-				if (recentMachineFilter && String(item.machine_id) !== String(recentMachineFilter)) return false;
-				if (recentCollectorFilter && item.collector !== recentCollectorFilter) return false;
-				return true;
-			});
-
-			// Populate filter dropdowns - clear and rebuild
-			const pointFilter = document.getElementById('recentPointFilter');
-			const machineFilter = document.getElementById('recentMachineFilter');
-			const collectorFilter = document.getElementById('recentCollectorFilter');
-
-			// Clear existing options (except first)
-			while (pointFilter.options.length > 1) pointFilter.remove(1);
-			while (machineFilter.options.length > 1) machineFilter.remove(1);
-			while (collectorFilter.options.length > 1) collectorFilter.remove(1);
-
-			// Use state.allPoints, state.allMachines for unique values instead of collections
-			const uniquePoints = [...new Set(state.allMachines.map(m => m.point_id))];
-			const uniqueMachines = [...new Set(state.allCollections.map(c => c.machine_id))];
-			const uniqueCollectors = [...new Set(state.allCollections.map(c => c.collector))];
-
-			log(`Found ${uniquePoints.length} points, ${uniqueMachines.length} machines, ${uniqueCollectors.length} collectors`);
-
-			uniquePoints.sort((a, b) => a - b).forEach(pid => {
-				const point = state.allPoints.find(p => p.id === pid);
-				if (point) {
-					const opt = document.createElement('option');
-					opt.value = pid;
-					opt.textContent = point.name;
-					pointFilter.appendChild(opt);
-					log(`  Added point: ${pid} = ${point.name}`);
-				}
-			});
-
-			uniqueMachines.sort((a, b) => a - b).forEach(mid => {
-				const machine = state.allCollections.find(c => c.machine_id === mid);
-				if (machine) {
-					const opt = document.createElement('option');
-					opt.value = mid;
-					opt.textContent = machine.machine_name;
-					machineFilter.appendChild(opt);
-				}
-			});
-
-			uniqueCollectors.sort().forEach(collector => {
-				const opt = document.createElement('option');
-				opt.value = collector;
-				opt.textContent = collector;
-				collectorFilter.appendChild(opt);
-			});
-
-			log(`✅ Populated filters: ${pointFilter.options.length - 1} points, ${machineFilter.options.length - 1} machines, ${collectorFilter.options.length - 1} collectors`);
-
-			// Debug: log all options in pointFilter
-			log('Points in filter:');
-			for (let i = 0; i < pointFilter.options.length; i++) {
-				log(`  [${i}] value="${pointFilter.options[i].value}" text="${pointFilter.options[i].text}"`);
-			}
-
-			if (recentFiltered.length === 0) {
+			if (recentDisplay.length === 0) {
 				document.getElementById('recentList').innerHTML = '<div style="color: var(--bs-gray-600); text-align: center; padding: 2rem;">Нет инкассаций</div>';
 			} else {
 				const header = `
@@ -1651,7 +1570,7 @@
 						<div style="text-align: right;">Сумма</div>
 					</div>
 				`;
-				const items = recentFiltered.slice(0, 10).map(item => `
+				const items = recentDisplay.map(item => `
 					<div style="display: grid; grid-template-columns: 1.2fr 2fr 2fr 1.5fr 1fr; gap: 1rem; padding: 0.75rem; border-bottom: 1px solid var(--bs-border-color); align-items: center; font-size: 0.9rem;">
 						<div style="font-weight: 500;">${new Date(item.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' })} ${new Date(item.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
 						<div>${item.point_name}</div>
@@ -1663,24 +1582,15 @@
 				document.getElementById('recentList').innerHTML = header + items;
 			}
 
-			// Update statistics for recent collections
-			const recentSum = recentFiltered.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-			const recentItems = recentFiltered.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-			const recentAvg = recentFiltered.length > 0 ? (recentSum / recentFiltered.length).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—';
+			// Update statistics for all collections
+			const totalSum = filtered.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+			const totalItems = filtered.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+			const totalAvg = filtered.length > 0 ? (totalSum / filtered.length).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—';
 
-			document.getElementById('statsCount').textContent = recentFiltered.length;
-			document.getElementById('statsSum').textContent = recentSum.toLocaleString('ru-RU') + ' ₴';
-			document.getElementById('statsAvg').textContent = (recentAvg === '—' ? '—' : recentAvg + ' ₴');
-			document.getElementById('statsItems').textContent = recentItems + ' шт.';
-
-			// Attach filter listeners if not already attached
-			['recentPointFilter', 'recentMachineFilter', 'recentCollectorFilter'].forEach(id => {
-				const elem = document.getElementById(id);
-				if (elem && !elem.dataset.listenerAttached) {
-					elem.addEventListener('change', updateDashboard);
-					elem.dataset.listenerAttached = 'true';
-				}
-			});
+			document.getElementById('statsCount').textContent = filtered.length;
+			document.getElementById('statsSum').textContent = totalSum.toLocaleString('ru-RU') + ' ₴';
+			document.getElementById('statsAvg').textContent = (totalAvg === '—' ? '—' : totalAvg + ' ₴');
+			document.getElementById('statsItems').textContent = totalItems + ' шт.';
 
 			// Machine log
 			if (state.machineId === 'all') {
