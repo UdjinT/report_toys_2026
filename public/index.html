@@ -560,7 +560,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-lg-3">
+				<div class="col-lg-3" style="margin-top: 1.5rem;">
 					<div class="card">
 						<div class="card-header">
 							<h3 class="card-title" style="font-size: 1rem;">Статистика</h3>
@@ -1717,15 +1717,16 @@
 				document.getElementById('recentList').innerHTML = header + items;
 			}
 
-			// Update statistics for all collections
-			const totalSum = filtered.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-			const totalItems = filtered.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-			const totalAvg = filtered.length > 0 ? (totalSum / filtered.length).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—';
+			// Update statistics from recent filtered data (respects recent select filters)
+			const totalSum = recentFiltered.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+			const totalItems = recentFiltered.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+			const totalAvg = recentFiltered.length > 0 ? (totalSum / recentFiltered.length).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—';
 
-			document.getElementById('statsCount').textContent = filtered.length;
+			document.getElementById('statsCount').textContent = recentFiltered.length;
 			document.getElementById('statsSum').textContent = totalSum.toLocaleString('ru-RU') + ' ₴';
 			document.getElementById('statsAvg').textContent = (totalAvg === '—' ? '—' : totalAvg + ' ₴');
 			document.getElementById('statsItems').textContent = totalItems + ' шт.';
+			log(`Stats updated: count=${recentFiltered.length}, sum=${totalSum}, items=${totalItems}`);
 
 			// Machine log
 			if (state.machineId === 'all') {
