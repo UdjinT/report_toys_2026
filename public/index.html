@@ -634,11 +634,10 @@
 		};
 
 		// Simple theme state
-		let currentTheme = 'light';
+		let currentTheme = localStorage.getItem('theme') || 'light';
 
 		function initTheme() {
-			currentTheme = 'light';
-			log(`🎨 Theme initialized to: light`);
+			log(`🎨 Theme initialized to: ${currentTheme}`);
 			updateThemeIcon(currentTheme);
 			applyThemeStyles(currentTheme);
 		}
@@ -690,6 +689,7 @@
 
 		function toggleTheme() {
 			currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+			localStorage.setItem('theme', currentTheme);
 			log(`🌓 Theme toggled to: ${currentTheme}`);
 			updateThemeIcon(currentTheme);
 			applyThemeStyles(currentTheme);
