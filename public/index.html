@@ -536,6 +536,25 @@
 							<h3 class="card-title">Последние инкассации</h3>
 						</div>
 						<div class="card-body">
+							<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+								<div>
+									<label style="display: block; font-size: 0.75rem; color: var(--bs-gray-600); margin-bottom: 0.25rem;">Точка</label>
+									<select id="pointSelect" class="form-select" style="font-size: 0.875rem;">
+										<option value="">Все точки</option>
+									</select>
+								</div>
+								<div>
+									<label style="display: block; font-size: 0.75rem; color: var(--bs-gray-600); margin-bottom: 0.25rem;">Автомат</label>
+									<select id="machineSelect" class="form-select" style="font-size: 0.875rem;">
+										<option value="">Все автоматы</option>
+									</select>
+								</div>
+								<div>
+									<label style="display: block; font-size: 0.75rem; color: var(--bs-gray-600); margin-bottom: 0.25rem;">Инкассатор</label>
+									<select id="collectorSelect" class="form-select" style="font-size: 0.875rem;">
+										<option value="">Все инкассаторы</option>
+									</select>
+								</div>
 							</div>
 							<div id="recentList" style="color: var(--bs-gray-600); text-align: center; padding: 2rem 0;">Загрузка...</div>
 						</div>
@@ -1554,6 +1573,49 @@
 						</tr>
 					`).join('');
 			}
+
+			// Populate selects with options (no filtering, just display)
+			const pointSelect = document.getElementById('pointSelect');
+			const machineSelect = document.getElementById('machineSelect');
+			const collectorSelect = document.getElementById('collectorSelect');
+
+			// Clear existing options (except first)
+			while (pointSelect.options.length > 1) pointSelect.remove(1);
+			while (machineSelect.options.length > 1) machineSelect.remove(1);
+			while (collectorSelect.options.length > 1) collectorSelect.remove(1);
+
+			// Add point options
+			const uniquePoints = [...new Set(state.allMachines.map(m => m.point_id))];
+			uniquePoints.sort((a, b) => a - b).forEach(pid => {
+				const point = state.allPoints.find(p => p.id === pid);
+				if (point) {
+					const opt = document.createElement('option');
+					opt.value = pid;
+					opt.textContent = point.name;
+					pointSelect.appendChild(opt);
+				}
+			});
+
+			// Add machine options
+			const uniqueMachines = [...new Set(filtered.map(c => c.machine_id))];
+			uniqueMachines.sort((a, b) => a - b).forEach(mid => {
+				const machine = filtered.find(c => c.machine_id === mid);
+				if (machine) {
+					const opt = document.createElement('option');
+					opt.value = mid;
+					opt.textContent = machine.machine_name;
+					machineSelect.appendChild(opt);
+				}
+			});
+
+			// Add collector options
+			const uniqueCollectors = [...new Set(filtered.map(c => c.collector))];
+			uniqueCollectors.sort().forEach(collector => {
+				const opt = document.createElement('option');
+				opt.value = collector;
+				opt.textContent = collector;
+				collectorSelect.appendChild(opt);
+			});
 
 			// Recent collections - just display without filtering
 			const recentDisplay = filtered.slice(0, 10);
