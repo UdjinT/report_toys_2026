@@ -47,9 +47,30 @@
 		body[data-bs-theme="dark"] .text-muted {
 			color: rgba(255, 255, 255, 0.7) !important;
 		}
-		/* СВЕТЛАЯ ТЕМА - НЕ МЕНЯТЬ */
+		/* ===== СВЕТЛАЯ ТЕМА ===== */
 		body[data-bs-theme="light"] .card {
-			/* остаются обычные стили */
+			background: white !important;
+			border: 1px solid rgba(0, 0, 0, 0.1) !important;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+		}
+		body[data-bs-theme="light"] .card-header {
+			background: #f8f9fa !important;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+		}
+		body[data-bs-theme="light"] .stat-value {
+			color: #212529 !important;
+		}
+		body[data-bs-theme="light"] .stat-label {
+			color: #666 !important;
+		}
+		body[data-bs-theme="light"] .list-time {
+			color: #212529 !important;
+		}
+		body[data-bs-theme="light"] .list-details {
+			color: #999 !important;
+		}
+		body[data-bs-theme="light"] .list-amount {
+			color: #198754 !important;
 		}
 		.page-wrapper {
 			padding: 1.5rem 0;
