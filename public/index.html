@@ -587,7 +587,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-lg-6">
+				<div class="col-lg-6" style="margin-top: 1.5rem;">
 					<div class="card">
 						<div class="card-header">
 							<h3 class="card-title">История выбранного автомата</h3>
@@ -1728,15 +1728,16 @@
 			document.getElementById('statsItems').textContent = totalItems + ' шт.';
 			log(`Stats updated: count=${recentFiltered.length}, sum=${totalSum}, items=${totalItems}`);
 
-			// Machine log
-			if (state.machineId === 'all') {
-				document.getElementById('machineLog').innerHTML = '<div style="color: var(--bs-gray-600);">Выберите конкретный автомат</div>';
+			// Machine log - show history from selected machine in recent filters
+			const selectedRecentMachineId = machineSelect.value;
+			if (!selectedRecentMachineId) {
+				document.getElementById('machineLog').innerHTML = '<div style="color: var(--bs-gray-600); text-align: center; padding: 2rem 0;">Выберите конкретный автомат</div>';
 			} else {
-				const items = state.allCollections.filter(i => String(i.machine_id) === String(state.machineId));
-				if (items.length === 0) {
-					document.getElementById('machineLog').innerHTML = '<div style="color: var(--bs-gray-600);">Нет данных по этому автомату</div>';
+				const machineItems = state.allCollections.filter(i => String(i.machine_id) === String(selectedRecentMachineId));
+				if (machineItems.length === 0) {
+					document.getElementById('machineLog').innerHTML = '<div style="color: var(--bs-gray-600); text-align: center; padding: 2rem 0;">Нет данных по этому автомату</div>';
 				} else {
-					document.getElementById('machineLog').innerHTML = items.slice(0, 10).map(item => `
+					document.getElementById('machineLog').innerHTML = machineItems.slice(0, 10).map(item => `
 						<div class="list-item">
 							<div>
 								<div class="list-time">${new Date(item.created_at).toLocaleString('ru-RU')}</div>
