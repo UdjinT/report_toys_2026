@@ -1579,6 +1579,11 @@
 			const machineSelect = document.getElementById('machineSelect');
 			const collectorSelect = document.getElementById('collectorSelect');
 
+			log('DEBUG: pointSelect element:', pointSelect);
+			log('DEBUG: state.allMachines:', state.allMachines);
+			log('DEBUG: state.allCollections:', state.allCollections);
+			log('DEBUG: state.allPoints:', state.allPoints);
+
 			// Clear existing options (except first)
 			while (pointSelect.options.length > 1) pointSelect.remove(1);
 			while (machineSelect.options.length > 1) machineSelect.remove(1);
@@ -1586,6 +1591,7 @@
 
 			// Add point options from ALL machines (not just filtered)
 			const uniquePoints = [...new Set(state.allMachines.map(m => m.point_id))];
+			log('DEBUG: uniquePoints:', uniquePoints);
 			uniquePoints.sort((a, b) => a - b).forEach(pid => {
 				const point = state.allPoints.find(p => p.id === pid);
 				if (point) {
@@ -1593,11 +1599,13 @@
 					opt.value = pid;
 					opt.textContent = point.name;
 					pointSelect.appendChild(opt);
+					log(`Added point option: ${point.name}`);
 				}
 			});
 
 			// Add machine options from ALL collections (not just filtered)
 			const uniqueMachines = [...new Set(state.allCollections.map(c => c.machine_id))];
+			log('DEBUG: uniqueMachines:', uniqueMachines);
 			uniqueMachines.sort((a, b) => a - b).forEach(mid => {
 				const machine = state.allCollections.find(c => c.machine_id === mid);
 				if (machine) {
@@ -1605,17 +1613,24 @@
 					opt.value = mid;
 					opt.textContent = machine.machine_name;
 					machineSelect.appendChild(opt);
+					log(`Added machine option: ${machine.machine_name}`);
 				}
 			});
 
 			// Add collector options from ALL collections (not just filtered)
 			const uniqueCollectors = [...new Set(state.allCollections.map(c => c.collector))];
+			log('DEBUG: uniqueCollectors:', uniqueCollectors);
 			uniqueCollectors.sort().forEach(collector => {
 				const opt = document.createElement('option');
 				opt.value = collector;
 				opt.textContent = collector;
 				collectorSelect.appendChild(opt);
+				log(`Added collector option: ${collector}`);
 			});
+
+			log('DEBUG: pointSelect.options.length:', pointSelect.options.length);
+			log('DEBUG: machineSelect.options.length:', machineSelect.options.length);
+			log('DEBUG: collectorSelect.options.length:', collectorSelect.options.length);
 
 			// Recent collections - just display without filtering
 			const recentDisplay = filtered.slice(0, 10);
