@@ -1,7 +1,8 @@
-import { handleTelegramBot } from './bot';
+import { handleTelegramBot, debugLogs } from './bot';
 
 export interface Env {
   D1_REPORT_TOYS: D1Database;
+  TG_BOT_TOKEN: string;
   __STATIC_CONTENT: {
     fetch(request: Request): Promise<Response>;
   };
@@ -23,6 +24,13 @@ export default {
       });
     }
 
+    if (pathname === '/' || pathname === '') {
+      return new Response(null, {
+        status: 302,
+        headers: { 'Location': '/admin.html' }
+      });
+    }
+
     if (pathname.startsWith('/api/')) {
       return apiHandler(request, env);
     }
@@ -30,11 +38,51 @@ export default {
     if (pathname === '/webhook/telegram' && request.method === 'POST') {
       try {
         const body = await request.json();
+        console.log('📨 Telegram webhook received:', body.update_id);
+        if (!env.TG_BOT_TOKEN) {
+          console.error('❌ TG_BOT_TOKEN not set in env!');
+          return new Response('Error: No token', { status: 500 });
+        }
         await handleTelegramBot(body, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
       } catch (e) {
-        console.error('Telegram error:', e);
+        console.error('❌ Telegram error:', e);
       }
       return new Response('OK');
+    }
+
+    if (pathname === '/test/bot') {
+      return new Response(JSON.stringify({
+        status: 'Test endpoint',
+        token: env.TG_BOT_TOKEN ? 'set' : 'NOT SET',
+        db: env.D1_REPORT_TOYS ? 'connected' : 'NOT CONNECTED'
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (pathname === '/test/webhook' && request.method === 'POST') {
+      try {
+        debugLogs.length = 0; // Clear previous logs
+        const testUpdate = {
+          update_id: Math.random() * 1000000,
+          message: {
+            message_id: 1,
+            from: { id: 123456789, is_bot: false, first_name: 'TestUser' },
+            chat: { id: 123456789, type: 'private' },
+            date: Math.floor(Date.now() / 1000),
+            text: 'Иван Иванов'
+          }
+        };
+        await handleTelegramBot(testUpdate, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
+        return new Response(JSON.stringify({ ok: true, logs: debugLogs }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: String(e), logs: debugLogs }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     return serveStatic(request, env);

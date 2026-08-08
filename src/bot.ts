@@ -11,9 +11,18 @@ interface UserState {
 // In-memory store for user states (will be reset on redeployment)
 const userStates = new Map<number, UserState>();
 
+// Debug logging
+const debugLogs: string[] = [];
+const addLog = (msg: string) => {
+  console.log(msg);
+  debugLogs.push(msg);
+};
+
+export { debugLogs };
+
 export async function handleTelegramBot(update: any, db: any, token: string) {
   try {
-    console.log('🤖 TG Update:', update.update_id);
+    addLog('🤖 TG Update: ' + update.update_id);
 
     const message = update.message;
     const callbackQuery = update.callback_query;
@@ -24,7 +33,7 @@ export async function handleTelegramBot(update: any, db: any, token: string) {
       await handleCallback(callbackQuery, db, token);
     }
   } catch (error) {
-    console.error('❌ Bot error:', error);
+    addLog('❌ Bot error: ' + String(error));
   }
 }
 
@@ -33,7 +42,7 @@ async function handleMessage(message: any, db: any, token: string) {
   const chatId = message.chat.id;
   const text = message.text;
 
-  console.log(`📝 Message from ${userId}: ${text}`);
+  addLog(`📝 Message from ${userId}: ${text}`);
 
   let state = userStates.get(userId);
 
@@ -52,10 +61,14 @@ async function handleMessage(message: any, db: any, token: string) {
 
     // Load points
     try {
+      addLog('🔄 Loading points from DB...');
       const result = await db.prepare('SELECT id, name FROM points ORDER BY name').all();
       const points = result.results as any[] || [];
 
+      addLog(`✅ Loaded ${points.length} points`);
+
       if (points.length === 0) {
+        addLog('⚠️ No points found');
         await sendMessage(chatId, '❌ Нет доступных точек', token);
         return;
       }
@@ -66,6 +79,8 @@ async function handleMessage(message: any, db: any, token: string) {
         ]),
       };
 
+      addLog(`📍 Built keyboard with ${points.length} buttons`);
+
       await sendMessage(
         chatId,
         `✅ Спасибо, ${state.name}!\n\n📍 Выберите точку:`,
@@ -73,7 +88,8 @@ async function handleMessage(message: any, db: any, token: string) {
         keyboard
       );
     } catch (error) {
-      console.error('❌ Error loading points:', error);
+      addLog('❌ Error loading points: ' + String(error));
+      addLog('Stack: ' + (error instanceof Error ? error.stack : 'no stack'));
       await sendMessage(chatId, '❌ Ошибка загрузки точек', token);
     }
     return;
@@ -246,11 +262,23 @@ async function sendMessage(chatId: number, text: string, token: string, markup?:
     payload.reply_markup = markup;
   }
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  addLog(`📤 SEND MESSAGE to ${chatId}: ${text.substring(0, 50)}...`);
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!data.ok) {
+      addLog('❌ Telegram API error: ' + data.description);
+    } else {
+      addLog('✅ Message sent successfully to Telegram');
+    }
+  } catch (e) {
+    addLog('❌ Send error: ' + String(e));
+  }
 }
 
 async function editMessage(chatId: number, messageId: number, text: string, token: string, markup?: any) {

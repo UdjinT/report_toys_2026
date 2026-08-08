@@ -512,16 +512,12 @@
 	<script src="/assets/js/app.js"></script>
 
 	<script>
-		// ===== AUTH CHECK =====
-		if (!localStorage.getItem('adminToken')) {
-			window.location.href = '/login.html';
-		}
-
 		// Logout button
-		document.getElementById('logoutBtn').addEventListener('click', () => {
-			localStorage.removeItem('adminToken');
-			window.location.href = '/login.html';
-		});
+		if (document.getElementById('logoutBtn')) {
+			document.getElementById('logoutBtn').addEventListener('click', () => {
+				console.log('Logout clicked');
+			});
+		}
 
 		// ===== LOGGING =====
 		const log = (msg, data) => {
