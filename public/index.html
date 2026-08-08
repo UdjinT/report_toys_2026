@@ -27,16 +27,18 @@
 			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
 			background-attachment: fixed !important;
 		}
-		/* ===== ТОЛЬКО ДЛЯ ТЁМНОЙ ТЕМЫ ===== */
+		/* ===== ТЁМНАЯ ТЕМА - LIQUID GLASS APPLE ===== */
 		/* Glassmorphism cards */
 		body[data-bs-theme="dark"] .card {
-			background: rgba(255, 255, 255, 0.08) !important;
-			backdrop-filter: blur(10px) !important;
-			border: 1px solid rgba(255, 255, 255, 0.15) !important;
+			background: rgba(255, 255, 255, 0.1) !important;
+			backdrop-filter: blur(20px) !important;
+			-webkit-backdrop-filter: blur(20px) !important;
+			border: 1px solid rgba(255, 255, 255, 0.2) !important;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
 		}
 		body[data-bs-theme="dark"] .card-header {
-			background: rgba(255, 255, 255, 0.05) !important;
-			border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+			background: rgba(255, 255, 255, 0.08) !important;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
 		}
 		body[data-bs-theme="dark"] .page-header {
 			color: white !important;
@@ -47,15 +49,17 @@
 		body[data-bs-theme="dark"] .text-muted {
 			color: rgba(255, 255, 255, 0.7) !important;
 		}
-		/* ===== СВЕТЛАЯ ТЕМА ===== */
+		/* ===== СВЕТЛАЯ ТЕМА - LIQUID GLASS APPLE ===== */
 		body[data-bs-theme="light"] .card {
-			background: white !important;
-			border: 1px solid rgba(0, 0, 0, 0.1) !important;
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+			background: rgba(255, 255, 255, 0.7) !important;
+			backdrop-filter: blur(20px) !important;
+			-webkit-backdrop-filter: blur(20px) !important;
+			border: 1px solid rgba(255, 255, 255, 0.5) !important;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
 		}
 		body[data-bs-theme="light"] .card-header {
-			background: #f8f9fa !important;
-			border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+			background: rgba(255, 255, 255, 0.5) !important;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
 		}
 		body[data-bs-theme="light"] .stat-value {
 			color: #212529 !important;
