@@ -1675,8 +1675,11 @@
 
 			let recentFiltered = filtered;
 			if (selectedPointId) {
-				recentFiltered = recentFiltered.filter(item => String(item.point_id) === String(selectedPointId));
-				log(`Filtered by point ${selectedPointId}: ${recentFiltered.length} items`);
+				// Get all machines for this point, then filter collections by those machines
+				const machinesForPoint = state.allMachines.filter(m => String(m.point_id) === String(selectedPointId));
+				const machineIds = machinesForPoint.map(m => m.id);
+				recentFiltered = recentFiltered.filter(item => machineIds.includes(item.machine_id));
+				log(`Filtered by point ${selectedPointId} (machines: ${machineIds}): ${recentFiltered.length} items`);
 			}
 			if (selectedMachineId) {
 				recentFiltered = recentFiltered.filter(item => String(item.machine_id) === String(selectedMachineId));
