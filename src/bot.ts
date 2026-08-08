@@ -49,6 +49,43 @@ async function handleMessage(message: any, db: any, token: string) {
   // Handle /start command
   if (text === '/start') {
     addLog(`🚀 /start command received`);
+    // Check if user already has a name saved
+    if (state && state.name) {
+      addLog(`📝 User already has name: ${state.name}, skipping to points`);
+      // Reset state but keep the name
+      state = {
+        step: 'select_point',
+        name: state.name,
+        pointId: undefined,
+        machineId: undefined,
+        amount: undefined,
+        quantity: undefined,
+        comment: '',
+      };
+      userStates.set(userId, state);
+      // Load and show points
+      try {
+        const result = await db.prepare('SELECT id, name FROM points ORDER BY name').all();
+        const points = result.results as any[] || [];
+        if (points.length > 0) {
+          const keyboard = {
+            inline_keyboard: points.map((p) => [
+              { text: p.name, callback_data: `point_${p.id}` },
+            ]),
+          };
+          await sendMessage(
+            chatId,
+            `📍 Добро пожаловать, ${state.name}! Выберите точку:`,
+            token,
+            keyboard
+          );
+        }
+      } catch (e) {
+        addLog('❌ Error in /start with saved name: ' + String(e));
+      }
+      return;
+    }
+    // New user - ask for name
     await sendMessage(chatId, '👋 Добро пожаловать! Введите ваше имя (как вы хотите отображаться в системе):', token);
     return;
   }
@@ -253,9 +290,20 @@ async function saveCollection(chatId: number, userId: number, state: UserState, 
 
     await sendMessage(chatId, summary, token);
 
-    // Clear state
-    userStates.delete(userId);
-    console.log('✅ State cleared for user', userId);
+    // Keep the name and ask for next point selection
+    await sendMessage(chatId, `\n📍 Готовы к следующей инкассации? Выберите точку:`, token);
+
+    // Reset state but keep name for next collection
+    userStates.set(userId, {
+      step: 'select_point',
+      name: state.name,
+      pointId: undefined,
+      machineId: undefined,
+      amount: undefined,
+      quantity: undefined,
+      comment: '',
+    });
+    addLog(`✅ State reset but kept name: ${state.name}`);
   } catch (error) {
     console.error('❌ Save error:', error);
     await sendMessage(chatId, `❌ Ошибка при сохранении: ${error}`, token);
