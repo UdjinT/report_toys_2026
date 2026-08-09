@@ -1632,11 +1632,6 @@
 			log('✅ Dashboard updated');
 		}
 
-		// Start polling Telegram bot updates every 2 seconds
-		setInterval(() => {
-			fetch('/bot/updates').catch(e => console.error('Bot polling error:', e));
-		}, 2000);
-
 		// Start application immediately (no auth required)
 		init();
 	</script>
