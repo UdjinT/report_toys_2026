@@ -146,6 +146,22 @@ export default {
       }
     }
 
+    if (pathname === '/reset/offset' && request.method === 'POST') {
+      try {
+        await env.D1_REPORT_TOYS.prepare(
+          'UPDATE bot_config SET offset = 0 WHERE id = 1'
+        ).run();
+        return new Response(JSON.stringify({ ok: true, message: 'Offset reset to 0' }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     if (pathname === '/test/webhook' && request.method === 'POST') {
       try {
         debugLogs.length = 0; // Clear previous logs
