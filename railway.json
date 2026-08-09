@@ -1,9 +1,5 @@
 {
   "build": {
-    "builder": "dockerfile",
-    "dockerfile": "Dockerfile.bot"
-  },
-  "deploy": {
-    "startCommand": "node bot-polling.js"
+    "builder": "nixpacks"
   }
 }

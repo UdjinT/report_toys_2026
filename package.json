@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "description": "PWA and web reporting for toy vending machines with Cloudflare Workers + D1.",
   "scripts": {
+    "start": "npm run build:bot && node bot-polling.js",
+    "build:bot": "tsc bot-polling.ts --lib es2020 --module commonjs --target es2020 --esModuleInterop",
     "dev": "wrangler dev --port 8787",
     "dev:8788": "wrangler dev",
     "build": "wrangler build",
