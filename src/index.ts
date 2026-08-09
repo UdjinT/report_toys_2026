@@ -95,13 +95,40 @@ export default {
     }
 
     if (pathname === '/test/bot') {
-      return new Response(JSON.stringify({
-        status: 'Test endpoint',
-        token: env.TG_BOT_TOKEN ? 'set' : 'NOT SET',
-        db: env.D1_REPORT_TOYS ? 'connected' : 'NOT CONNECTED'
-      }), {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      try {
+        // Create table if not exists
+        await env.D1_REPORT_TOYS.prepare(`
+          CREATE TABLE IF NOT EXISTS bot_user_states (
+            user_id INTEGER PRIMARY KEY,
+            step TEXT NOT NULL,
+            name TEXT,
+            point_id INTEGER,
+            machine_id INTEGER,
+            amount INTEGER,
+            quantity INTEGER,
+            comment TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          )
+        `).run();
+
+        return new Response(JSON.stringify({
+          status: 'Test endpoint',
+          token: env.TG_BOT_TOKEN ? 'set' : 'NOT SET',
+          db: env.D1_REPORT_TOYS ? 'connected' : 'NOT CONNECTED',
+          table_created: true
+        }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({
+          status: 'Error',
+          error: String(e)
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     if (pathname === '/setup/webhook' && request.method === 'POST') {
