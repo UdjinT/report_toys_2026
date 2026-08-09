@@ -155,6 +155,7 @@ async function handleMessage(message: any, db: any, token: string) {
       comment: '',
     };
     userStates.set(userId, state);
+    await saveUserState(db, userId, state);
 
     // Load points
     try {
@@ -300,7 +301,6 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
 
       await answerCallback(callbackQuery.id, '', token);
       await editMessage(chatId, messageId, 'Введите сумму инкассации (₴):', token);
-      await sendMessage(chatId, '💰 Введите сумму:', token);
     }
     // Add comment
     else if (data === 'add_comment') {
@@ -309,7 +309,6 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
       await saveUserState(db, userId, state);
       await answerCallback(callbackQuery.id, '', token);
       await editMessage(chatId, messageId, '✏️ Введите комментарий:', token);
-      await sendMessage(chatId, '📝 Введите ваш комментарий:', token);
     }
     // Skip comment
     else if (data === 'skip_comment') {
@@ -417,16 +416,27 @@ async function sendMessage(chatId: number, text: string, token: string, markup?:
 }
 
 async function editMessage(chatId: number, messageId: number, text: string, token: string, markup?: any) {
-  const payload: any = { chat_id: chatId, message_id: messageId, text };
-  if (markup) {
-    payload.reply_markup = markup;
-  }
+  try {
+    const payload: any = { chat_id: chatId, message_id: messageId, text };
+    if (markup) {
+      payload.reply_markup = markup;
+    }
 
-  await fetch(`https://api.telegram.org/bot${token}/editMessageText`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+    const response = await fetch(`https://api.telegram.org/bot${token}/editMessageText`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json() as any;
+    if (!result.ok) {
+      addLog(`⚠️ editMessage failed: ${result.description}`);
+      // Fallback: send new message if edit fails
+      await sendMessage(chatId, text, token, markup);
+    }
+  } catch (e) {
+    addLog(`❌ editMessage error: ${String(e)}`);
+  }
 }
 
 async function answerCallback(callbackId: string, text: string, token: string) {
