@@ -146,6 +146,22 @@ export default {
       }
     }
 
+    if (pathname === '/check/offset') {
+      try {
+        const result = await env.D1_REPORT_TOYS.prepare(
+          'SELECT offset FROM bot_config WHERE id = 1'
+        ).first() as any;
+        return new Response(JSON.stringify({ ok: true, offset: result?.offset || 0 }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     if (pathname === '/reset/offset' && request.method === 'POST') {
       try {
         await env.D1_REPORT_TOYS.prepare(
