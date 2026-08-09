@@ -14,6 +14,7 @@ import {
 export interface Env {
   D1_REPORT_TOYS: D1Database;
   TG_BOT_TOKEN: string;
+  TG_BOT_SECRET: string;
   ADMIN_PASSWORD_HASH: string;
   SESSION_SECRET: string;
   __STATIC_CONTENT: {
@@ -50,6 +51,12 @@ export default {
     if (pathname === '/webhook/telegram' && request.method === 'POST') {
       console.log('🔔 [WEBHOOK] POST /webhook/telegram received');
       try {
+        const secretToken = request.headers.get('X-Telegram-Bot-Api-Secret-Token');
+        if (secretToken !== env.TG_BOT_SECRET) {
+          console.error('❌ [WEBHOOK] Invalid secret token');
+          return new Response('Unauthorized', { status: 401 });
+        }
+
         const body = await request.json();
         console.log('🔔 [WEBHOOK] Parsed JSON:', JSON.stringify(body).substring(0, 200));
         console.log('🔔 [WEBHOOK] update_id:', body.update_id);
@@ -122,9 +129,17 @@ export default {
     if (pathname === '/setup/webhook' && request.method === 'POST') {
       try {
         const webhookUrl = `https://${new URL(request.url).host}/webhook/telegram`;
-        const setupUrl = `https://api.telegram.org/bot${env.TG_BOT_TOKEN}/setWebhook?url=${encodeURIComponent(webhookUrl)}`;
+        const setupUrl = `https://api.telegram.org/bot${env.TG_BOT_TOKEN}/setWebhook`;
 
-        const response = await fetch(setupUrl);
+        const response = await fetch(setupUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: webhookUrl,
+            secret_token: env.TG_BOT_SECRET,
+            allowed_updates: ['message', 'callback_query']
+          })
+        });
         const result = await response.json() as any;
 
         return new Response(JSON.stringify({

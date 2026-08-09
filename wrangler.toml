@@ -4,7 +4,7 @@ account_id = "0dc04f0c7b2bafb89ee309f7cd4e9a30"
 workers_dev = true
 compatibility_date = "2026-07-28"
 assets = { directory = "./public" }
-vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8" }
+vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8", TG_BOT_SECRET = "collector_secret_token_2026" }
 
 
 [[d1_databases]]
@@ -14,15 +14,7 @@ database_name = "report_toys_2026"
 # database_id = "22ec155c-31da-4c92-97ca-712c20d8f5ef"
 
 [env.production]
-vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8" }
-
-# Note: ADMIN_PASSWORD_HASH and SESSION_SECRET must be set in Cloudflare Secrets
-# They are NOT stored in this file for security reasons
-# Set them via: wrangler secret put ADMIN_PASSWORD_HASH
-#             wrangler secret put SESSION_SECRET
-
-[env.production]
-vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8" }
+vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8", TG_BOT_SECRET = "collector_secret_token_2026" }
 
 # Note: ADMIN_PASSWORD_HASH and SESSION_SECRET must be set in Cloudflare Secrets
 # They are NOT stored in this file for security reasons
