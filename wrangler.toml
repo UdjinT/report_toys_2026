@@ -20,3 +20,11 @@ vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8" }
 # They are NOT stored in this file for security reasons
 # Set them via: wrangler secret put ADMIN_PASSWORD_HASH
 #             wrangler secret put SESSION_SECRET
+
+[env.production]
+vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8" }
+
+# Note: ADMIN_PASSWORD_HASH and SESSION_SECRET must be set in Cloudflare Secrets
+# They are NOT stored in this file for security reasons
+# Set them via: wrangler secret put ADMIN_PASSWORD_HASH
+#             wrangler secret put SESSION_SECRET

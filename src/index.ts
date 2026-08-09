@@ -73,7 +73,7 @@ export default {
 
     if (pathname === '/test/bot') {
       try {
-        // Create table if not exists
+        // Create tables if not exist
         await env.D1_REPORT_TOYS.prepare(`
           CREATE TABLE IF NOT EXISTS bot_user_states (
             user_id INTEGER PRIMARY KEY,
@@ -88,6 +88,17 @@ export default {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
           )
         `).run();
+
+        await env.D1_REPORT_TOYS.prepare(`
+          CREATE TABLE IF NOT EXISTS bot_config (
+            id INTEGER PRIMARY KEY,
+            offset INTEGER DEFAULT 0
+          )
+        `).run();
+
+        await env.D1_REPORT_TOYS.prepare(
+          'INSERT OR IGNORE INTO bot_config (id, offset) VALUES (1, 0)'
+        ).run();
 
         return new Response(JSON.stringify({
           status: 'Test endpoint',
@@ -228,6 +239,42 @@ async function apiHandler(request: Request, env: Env) {
     return new Response(JSON.stringify(result.results || []), {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
+  }
+
+  if (pathname === '/bot/poll') {
+    try {
+      // Get last offset from DB
+      const offsetResult = await env.D1_REPORT_TOYS.prepare(
+        'SELECT offset FROM bot_config WHERE id = 1'
+      ).first() as any;
+      const lastOffset = offsetResult?.offset || 0;
+
+      // Get updates from Telegram
+      const tgUrl = `https://api.telegram.org/bot${env.TG_BOT_TOKEN}/getUpdates?offset=${lastOffset + 1}&timeout=0&allowed_updates=message,callback_query`;
+      const tgResponse = await fetch(tgUrl);
+      const tgData = await tgResponse.json() as any;
+
+      if (tgData.ok && tgData.result && tgData.result.length > 0) {
+        // Process updates
+        for (const update of tgData.result) {
+          await handleTelegramBot(update, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
+        }
+        // Save new offset
+        const newOffset = tgData.result[tgData.result.length - 1].update_id;
+        await env.D1_REPORT_TOYS.prepare(
+          'INSERT INTO bot_config (id, offset) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET offset = excluded.offset'
+        ).bind(newOffset).run();
+      }
+
+      return new Response(JSON.stringify({ ok: true, count: tgData.result?.length || 0 }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
   }
 
   return new Response('Not found', { status: 404 });
