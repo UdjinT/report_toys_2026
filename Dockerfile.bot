@@ -1,0 +1,11 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY bot-polling.ts ./
+RUN npx tsc bot-polling.ts --lib es2020 --module commonjs --target es2020
+
+CMD ["node", "bot-polling.js"]
