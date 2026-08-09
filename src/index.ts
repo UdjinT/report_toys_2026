@@ -21,30 +21,7 @@ export interface Env {
   };
 }
 
-let lastUpdateId = 0;
-
 export default {
-  async scheduled(event: any, env: Env) {
-    // Cron trigger for polling Telegram updates every 3 seconds
-    try {
-      console.log(`🤖 Polling updates, lastUpdateId=${lastUpdateId}`);
-      const offset = lastUpdateId > 0 ? lastUpdateId + 1 : 0;
-      const url = `https://api.telegram.org/bot${env.TG_BOT_TOKEN}/getUpdates?offset=${offset}&timeout=1&allowed_updates=message,callback_query`;
-      const response = await fetch(url);
-      const result = await response.json() as any;
-
-      if (result.ok && result.result && result.result.length > 0) {
-        console.log(`✅ Got ${result.result.length} updates`);
-        for (const update of result.result) {
-          lastUpdateId = update.update_id;
-          await handleTelegramBot(update, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
-        }
-      }
-    } catch (e) {
-      console.error('❌ Cron polling error:', e);
-    }
-  },
-
   async fetch(request: Request, env: Env) {
     const url = new URL(request.url);
     const pathname = url.pathname;
