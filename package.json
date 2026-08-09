@@ -8,7 +8,7 @@
     "build:bot": "tsc bot-polling.ts --lib es2020 --module commonjs --target es2020 --esModuleInterop",
     "dev": "wrangler dev --port 8787",
     "dev:8788": "wrangler dev",
-    "build": "wrangler build",
+    "build": "if [ \"$SKIP_BUILD\" != \"true\" ]; then wrangler build; fi",
     "publish": "wrangler publish",
     "deploy": "wrangler publish"
   },

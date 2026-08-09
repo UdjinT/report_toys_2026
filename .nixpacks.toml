@@ -1,0 +1,5 @@
+[build]
+nixpkgs.nodejs = "22"
+
+[env]
+SKIP_WRANGLER_BUILD = "true"

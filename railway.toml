@@ -1,5 +1,8 @@
 [build]
 builder = "nixpacks"
 
+[env]
+SKIP_BUILD = "true"
+
 [deploy]
 startCommand = "npm run build:bot && node bot-polling.js"
