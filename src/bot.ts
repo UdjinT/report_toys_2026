@@ -8,9 +8,6 @@ interface UserState {
   comment?: string;
 }
 
-// In-memory cache for user states
-const userStates = new Map<number, UserState>();
-
 async function loadUserState(db: any, userId: number): Promise<UserState | null> {
   try {
     const result = await db.prepare(
@@ -93,10 +90,7 @@ async function handleMessage(message: any, db: any, token: string) {
   addLog(`📝 Message from ${userId}: ${text}`);
 
   // Load from cache or DB
-  let state = userStates.get(userId);
-  if (!state) {
-    state = await loadUserState(db, userId);
-  }
+  let state = await loadUserState(db, userId);
 
   // Handle /start command
   if (text === '/start') {
@@ -154,7 +148,6 @@ async function handleMessage(message: any, db: any, token: string) {
       quantity: undefined,
       comment: '',
     };
-    userStates.set(userId, state);
     await saveUserState(db, userId, state);
 
     // Load points
@@ -250,10 +243,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
   console.log(`🔘 Button from ${userId}: ${data}`);
 
   // Load from cache or DB
-  let state = userStates.get(userId);
-  if (!state) {
-    state = await loadUserState(db, userId);
-  }
+  let state = await loadUserState(db, userId);
 
   if (!state) {
     await answerCallback(callbackQuery.id, '⚠️ Сессия истекла', token);

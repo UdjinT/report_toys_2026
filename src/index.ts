@@ -160,12 +160,6 @@ export default {
       }
     }
 
-    if (pathname === '/bot/updates' && request.method === 'GET') {
-      return new Response(JSON.stringify({ ok: false, message: 'Bot polling disabled' }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
 
     return serveStatic(request, env);
   }
