@@ -108,7 +108,6 @@ async function handleMessage(message: any, db: any, token: string) {
         quantity: undefined,
         comment: '',
       };
-      userStates.set(userId, state);
       await saveUserState(db, userId, state);
       // Load and show points
       try {
@@ -196,7 +195,7 @@ async function handleMessage(message: any, db: any, token: string) {
 
     state.amount = amount;
     state.step = 'input_quantity';
-    userStates.set(userId, state);
+    await saveUserState(db, userId, state);
     await sendMessage(chatId, `✅ Сумма: ${amount}₴\n\nТеперь введите количество товаров:`, token);
   }
   // Step: Input quantity
@@ -209,7 +208,7 @@ async function handleMessage(message: any, db: any, token: string) {
 
     state.quantity = quantity;
     state.step = 'ask_comment';
-    userStates.set(userId, state);
+    await saveUserState(db, userId, state);
 
     const keyboard = {
       inline_keyboard: [
@@ -256,7 +255,6 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
       const pointId = parseInt(data.split('_')[1]);
       state.pointId = pointId;
       state.step = 'select_machine';
-      userStates.set(userId, state);
       await saveUserState(db, userId, state);
 
       // Load machines
@@ -286,7 +284,6 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
       const machineId = parseInt(data.split('_')[1]);
       state.machineId = machineId;
       state.step = 'input_amount';
-      userStates.set(userId, state);
       await saveUserState(db, userId, state);
 
       await answerCallback(callbackQuery.id, '', token);
@@ -295,7 +292,6 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
     // Add comment
     else if (data === 'add_comment') {
       state.step = 'ask_comment';
-      userStates.set(userId, state);
       await saveUserState(db, userId, state);
       await answerCallback(callbackQuery.id, '', token);
       await editMessage(chatId, messageId, '✏️ Введите комментарий:', token);
@@ -363,7 +359,7 @@ async function saveCollection(chatId: number, userId: number, state: UserState, 
     }
 
     // Reset state but keep name for next collection
-    userStates.set(userId, {
+    await saveUserState(db, userId, {
       step: 'select_point',
       name: state.name,
       pointId: undefined,
@@ -376,7 +372,6 @@ async function saveCollection(chatId: number, userId: number, state: UserState, 
   } catch (error) {
     console.error('❌ Save error:', error);
     await sendMessage(chatId, `❌ Ошибка при сохранении: ${error}`, token);
-    userStates.delete(userId);
   }
 }
 
