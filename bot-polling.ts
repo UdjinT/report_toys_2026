@@ -5,6 +5,18 @@ const WEBHOOK_URL = 'https://report_toys_2026.evtsarenko.workers.dev/webhook/tel
 
 let lastUpdateId = 0;
 
+async function deleteWebhook() {
+  try {
+    const response = await fetch(`${API_URL}/deleteWebhook`);
+    const data = await response.json() as any;
+    if (data.ok) {
+      console.log('✅ Webhook deleted');
+    }
+  } catch (error) {
+    console.error('❌ Failed to delete webhook:', error);
+  }
+}
+
 async function pollUpdates() {
   try {
     const url = `${API_URL}/getUpdates?offset=${lastUpdateId + 1}&timeout=30&allowed_updates=message,callback_query`;
@@ -38,8 +50,10 @@ async function pollUpdates() {
 }
 
 // Poll every 5 seconds
-console.log('🤖 Bot polling started...');
-setInterval(pollUpdates, 5000);
-
-// Also poll immediately
-pollUpdates();
+(async () => {
+  console.log('🤖 Bot polling starting...');
+  await deleteWebhook();
+  console.log('🤖 Bot polling started...');
+  setInterval(pollUpdates, 5000);
+  pollUpdates();
+})();
