@@ -239,12 +239,14 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
   const data = callbackQuery.data;
   const messageId = callbackQuery.message.message_id;
 
-  console.log(`🔘 Button from ${userId}: ${data}`);
+  addLog(`🔘 Button from ${userId}: ${data}`);
 
   // Load from cache or DB
   let state = await loadUserState(db, userId);
+  addLog(`📦 Loaded state for user ${userId}:`, state ? JSON.stringify(state) : 'NULL');
 
   if (!state) {
+    addLog(`❌ State not found for user ${userId} - session expired`);
     await answerCallback(callbackQuery.id, '⚠️ Сессия истекла', token);
     return;
   }
