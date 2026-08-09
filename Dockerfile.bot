@@ -2,10 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+# Скопируй package.json и установи зависимости
+COPY package.json package-lock.json* ./
+RUN npm install
 
+# Скопируй исходный код
 COPY bot-polling.ts ./
-RUN npx tsc bot-polling.ts --lib es2020 --module commonjs --target es2020
 
+# Компилируй TypeScript
+RUN npx tsc bot-polling.ts --lib es2020 --module commonjs --target es2020 --esModuleInterop
+
+# Запусти бота
 CMD ["node", "bot-polling.js"]

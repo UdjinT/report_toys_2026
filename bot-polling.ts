@@ -1,5 +1,4 @@
-import fetch from 'node-fetch';
-
+// Node.js 18+ has built-in fetch
 const BOT_TOKEN = '8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8';
 const API_URL = 'https://api.telegram.org/bot' + BOT_TOKEN;
 const WEBHOOK_URL = 'https://report_toys_2026.evtsarenko.workers.dev/webhook/telegram';
