@@ -8,8 +8,51 @@ interface UserState {
   comment?: string;
 }
 
-// In-memory store for user states (will be reset on redeployment)
+// In-memory cache for user states
 const userStates = new Map<number, UserState>();
+
+async function loadUserState(db: any, userId: number): Promise<UserState | null> {
+  try {
+    const result = await db.prepare(
+      'SELECT step, name, point_id, machine_id, amount, quantity, comment FROM bot_user_states WHERE user_id = ?'
+    ).bind(userId).first();
+
+    if (!result) return null;
+
+    return {
+      step: result.step as any,
+      name: result.name,
+      pointId: result.point_id,
+      machineId: result.machine_id,
+      amount: result.amount,
+      quantity: result.quantity,
+      comment: result.comment,
+    };
+  } catch (e) {
+    console.error('Error loading user state:', e);
+    return null;
+  }
+}
+
+async function saveUserState(db: any, userId: number, state: UserState): Promise<void> {
+  try {
+    await db.prepare(`
+      INSERT INTO bot_user_states (user_id, step, name, point_id, machine_id, amount, quantity, comment)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        step = excluded.step,
+        name = excluded.name,
+        point_id = excluded.point_id,
+        machine_id = excluded.machine_id,
+        amount = excluded.amount,
+        quantity = excluded.quantity,
+        comment = excluded.comment,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(userId, state.step, state.name, state.pointId, state.machineId, state.amount, state.quantity, state.comment).run();
+  } catch (e) {
+    console.error('Error saving user state:', e);
+  }
+}
 
 // Debug logging
 const debugLogs: string[] = [];
@@ -49,7 +92,11 @@ async function handleMessage(message: any, db: any, token: string) {
 
   addLog(`📝 Message from ${userId}: ${text}`);
 
+  // Load from cache or DB
   let state = userStates.get(userId);
+  if (!state) {
+    state = await loadUserState(db, userId);
+  }
 
   // Handle /start command
   if (text === '/start') {
@@ -68,6 +115,7 @@ async function handleMessage(message: any, db: any, token: string) {
         comment: '',
       };
       userStates.set(userId, state);
+      await saveUserState(db, userId, state);
       // Load and show points
       try {
         const result = await db.prepare('SELECT id, name FROM points ORDER BY name').all();
@@ -200,7 +248,11 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
 
   console.log(`🔘 Button from ${userId}: ${data}`);
 
+  // Load from cache or DB
   let state = userStates.get(userId);
+  if (!state) {
+    state = await loadUserState(db, userId);
+  }
 
   if (!state) {
     await answerCallback(callbackQuery.id, '⚠️ Сессия истекла', token);
@@ -214,6 +266,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
       state.pointId = pointId;
       state.step = 'select_machine';
       userStates.set(userId, state);
+      await saveUserState(db, userId, state);
 
       // Load machines
       const result = await db
@@ -243,6 +296,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
       state.machineId = machineId;
       state.step = 'input_amount';
       userStates.set(userId, state);
+      await saveUserState(db, userId, state);
 
       await answerCallback(callbackQuery.id, '', token);
       await editMessage(chatId, messageId, 'Введите сумму инкассации (₴):', token);
@@ -252,6 +306,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
     else if (data === 'add_comment') {
       state.step = 'ask_comment';
       userStates.set(userId, state);
+      await saveUserState(db, userId, state);
       await answerCallback(callbackQuery.id, '', token);
       await editMessage(chatId, messageId, '✏️ Введите комментарий:', token);
       await sendMessage(chatId, '📝 Введите ваш комментарий:', token);
