@@ -1082,65 +1082,72 @@
 		}
 
 		function filterData() {
-			log(`Filtering: pointId=${state.pointId}, machineId=${state.machineId}`);
-			log(`Total collections in state: ${state.allCollections?.length || 'UNDEFINED'}`);
-
-			const dateFromInput = document.getElementById('dateFrom');
-			const dateToInput = document.getElementById('dateTo');
-
-			log(`📅 Date inputs: from-element=${dateFromInput ? '✓' : '✗'}, to-element=${dateToInput ? '✓' : '✗'}`);
-
-			const dateFromStr = dateFromInput?.value || '';
-			const dateToStr = dateToInput?.value || '';
-
-			log(`📅 Raw date strings: from="${dateFromStr}", to="${dateToStr}"`);
-
-			const dateFrom = dateFromStr ? new Date(dateFromStr) : new Date();
-			const dateTo = dateToStr ? new Date(dateToStr) : new Date();
-			dateTo.setHours(23, 59, 59, 999);
-
-			log(`📅 Date filter: from=${dateFromStr} → ${dateFrom.toISOString()}`);
-			log(`📅 Date filter: to=${dateToStr} → ${dateTo.toISOString()}`);
-
 			try {
-				const samples = state.allCollections?.slice(0, 3)?.map(c => c.created_at)?.join(', ') || 'NO DATA';
-				log(`📊 Sample created_at values: ${samples}`);
-			} catch (e) {
-				log(`❌ Error getting samples: ${e.message}`);
+				log(`Filtering: pointId=${state.pointId}, machineId=${state.machineId}`);
+				const collCount = state.allCollections ? state.allCollections.length : 0;
+				log(`Total collections in state: ${collCount}`);
+
+				const dateFromInput = document.getElementById('dateFrom');
+				const dateToInput = document.getElementById('dateTo');
+
+				log(`📅 Date inputs: from-element=${dateFromInput ? '✓' : '✗'}, to-element=${dateToInput ? '✓' : '✗'}`);
+
+				const dateFromStr = dateFromInput?.value || '';
+				const dateToStr = dateToInput?.value || '';
+
+				log(`📅 Raw date strings: from="${dateFromStr}", to="${dateToStr}"`);
+
+				const dateFrom = dateFromStr ? new Date(dateFromStr) : new Date();
+				const dateTo = dateToStr ? new Date(dateToStr) : new Date();
+				dateTo.setHours(23, 59, 59, 999);
+
+				log(`📅 Date filter: from=${dateFromStr} → ${dateFrom.toISOString()}`);
+				log(`📅 Date filter: to=${dateToStr} → ${dateTo.toISOString()}`);
+
+				try {
+					const samples = state.allCollections?.slice(0, 3)?.map(c => c.created_at)?.join(', ') || 'NO DATA';
+					log(`📊 Sample created_at values: ${samples}`);
+				} catch (e) {
+					log(`❌ Error getting samples: ${e.message}`);
+				}
+
+				let byMachine = state.allCollections.filter(item => {
+					// Фильтруем по выбранному автомату (по ID)
+					if (state.machineId !== 'all') {
+						return String(item.machine_id) === String(state.machineId);
+					}
+
+					// Если точка выбрана, фильтруем по автоматам этой точки
+					if (state.pointId !== 'all') {
+						const machinesForPoint = state.allMachines
+							.filter(m => String(m.point_id) === String(state.pointId))
+							.map(m => m.id);
+						return machinesForPoint.includes(item.machine_id);
+					}
+
+					// Иначе показываем все
+					return true;
+				});
+				log(`After machine/point filter: ${byMachine.length} records`);
+
+				const filtered = byMachine.filter(item => {
+					// Фильтруем по периоду дат
+					const itemDate = new Date(item.created_at);
+					const passes = itemDate >= dateFrom && itemDate <= dateTo;
+					// Логируем первые несколько для debug
+					if (byMachine.indexOf(item) < 5) {
+						log(`  Item ${item.id}: "${item.created_at}" → ${itemDate.toISOString()} passes=${passes}`);
+					}
+					return passes;
+				});
+
+				log(`Filtered ${filtered.length} records from ${state.allCollections.length} total`);
+				return filtered;
+			} catch (error) {
+				log(`❌ filterData() error: ${error.message}`);
+				console.error(error);
+				return state.allCollections || [];
 			}
-
-			let byMachine = state.allCollections.filter(item => {
-				// Фильтруем по выбранному автомату (по ID)
-				if (state.machineId !== 'all') {
-					return String(item.machine_id) === String(state.machineId);
-				}
-
-				// Если точка выбрана, фильтруем по автоматам этой точки
-				if (state.pointId !== 'all') {
-					const machinesForPoint = state.allMachines
-						.filter(m => String(m.point_id) === String(state.pointId))
-						.map(m => m.id);
-					return machinesForPoint.includes(item.machine_id);
-				}
-
-				// Иначе показываем все
-				return true;
-			});
-			log(`After machine/point filter: ${byMachine.length} records`);
-
-			const filtered = byMachine.filter(item => {
-				// Фильтруем по периоду дат
-				const itemDate = new Date(item.created_at);
-				const passes = itemDate >= dateFrom && itemDate <= dateTo;
-				// Логируем первые несколько для debug
-				if (byMachine.indexOf(item) < 5) {
-					log(`  Item ${item.id}: "${item.created_at}" → ${itemDate.toISOString()} passes=${passes}`);
-				}
-				return passes;
-			});
-
-			log(`Filtered ${filtered.length} records from ${state.allCollections.length} total`);
-			return filtered;
 		}
 
 		function aggregateByInterval(items) {
