@@ -5,6 +5,7 @@ const WEBHOOK_URL = 'https://report_toys_2026.evtsarenko.workers.dev/webhook/tel
 
 let lastUpdateId = 0;
 let pollingActive = false;
+let consecutiveErrors = 0;
 
 async function deleteWebhook() {
   try {
@@ -20,20 +21,34 @@ async function deleteWebhook() {
 
 async function pollUpdates() {
   if (pollingActive) {
-    console.log('⏳ Previous poll still in progress, skipping...');
     return;
   }
 
   pollingActive = true;
   try {
-    const url = `${API_URL}/getUpdates?offset=${lastUpdateId + 1}&timeout=30&allowed_updates=message,callback_query`;
+    const url = `${API_URL}/getUpdates?offset=${lastUpdateId + 1}&timeout=5&allowed_updates=message,callback_query`;
     const response = await fetch(url);
     const data = (await response.json()) as any;
 
     if (!data.ok) {
+      // If we get 409 conflict, another instance is running
+      // Exit so Railway can restart us and kill the old one
+      if (data.error_code === 409) {
+        consecutiveErrors++;
+        console.error(`[409 CONFLICT #${consecutiveErrors}] Another instance detected. Exiting...`);
+        if (consecutiveErrors >= 3) {
+          console.error('🛑 Killing process due to repeated 409 conflicts');
+          process.exit(1);
+        }
+        return;
+      }
+
+      consecutiveErrors = 0;
       console.error('Telegram API error:', data);
       return;
     }
+
+    consecutiveErrors = 0;
 
     if (data.result && data.result.length > 0) {
       console.log(`📥 Got ${data.result.length} updates`);
@@ -41,14 +56,16 @@ async function pollUpdates() {
       for (const update of data.result) {
         lastUpdateId = update.update_id;
 
-        // Forward to webhook
-        await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(update),
-        });
-
-        console.log(`✅ Processed update ${update.update_id}`);
+        try {
+          await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(update),
+          });
+          console.log(`✅ Update ${update.update_id}`);
+        } catch (e) {
+          console.error(`❌ Failed to process update ${update.update_id}:`, e);
+        }
       }
     }
   } catch (error) {
