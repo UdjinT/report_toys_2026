@@ -1132,7 +1132,15 @@
 
 				const filtered = byMachine.filter(item => {
 					// Фильтруем по периоду дат
-					const itemDate = new Date(item.created_at);
+					// Handle both ISO format (2026-08-16T11:51:52.695Z) and MySQL format (2026-08-24 10:15:00)
+					let itemDate;
+					if (item.created_at.includes('T')) {
+						// ISO format - use as-is
+						itemDate = new Date(item.created_at);
+					} else {
+						// MySQL format (YYYY-MM-DD HH:mm:ss) - convert to ISO by replacing space with T
+						itemDate = new Date(item.created_at.replace(' ', 'T') + 'Z');
+					}
 					const passes = itemDate >= dateFrom && itemDate <= dateTo;
 					// Логируем первые несколько для debug
 					if (byMachine.indexOf(item) < 5) {
