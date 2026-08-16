@@ -60,7 +60,16 @@ async function saveUserState(db: any, kv: any, userId: number, state: UserState)
         quantity = excluded.quantity,
         comment = excluded.comment,
         updated_at = CURRENT_TIMESTAMP
-    `).bind(userId, state.step, state.name, state.pointId, state.machineId, state.amount, state.quantity, state.comment).run();
+    `).bind(
+      userId,
+      state.step,
+      state.name,
+      state.pointId ?? null,
+      state.machineId ?? null,
+      state.amount ?? null,
+      state.quantity ?? null,
+      state.comment || ''
+    ).run();
 
     addLog(`✅ [D1 WRITE] User ${userId} saved successfully`);
 

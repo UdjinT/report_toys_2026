@@ -1083,17 +1083,33 @@
 
 		function filterData() {
 			log(`Filtering: pointId=${state.pointId}, machineId=${state.machineId}`);
-			
-			const dateFromStr = document.getElementById('dateFrom').value;
-			const dateToStr = document.getElementById('dateTo').value;
+			log(`Total collections in state: ${state.allCollections?.length || 'UNDEFINED'}`);
+
+			const dateFromInput = document.getElementById('dateFrom');
+			const dateToInput = document.getElementById('dateTo');
+
+			log(`📅 Date inputs: from-element=${dateFromInput ? '✓' : '✗'}, to-element=${dateToInput ? '✓' : '✗'}`);
+
+			const dateFromStr = dateFromInput?.value || '';
+			const dateToStr = dateToInput?.value || '';
+
+			log(`📅 Raw date strings: from="${dateFromStr}", to="${dateToStr}"`);
+
 			const dateFrom = dateFromStr ? new Date(dateFromStr) : new Date();
 			const dateTo = dateToStr ? new Date(dateToStr) : new Date();
 			dateTo.setHours(23, 59, 59, 999);
 
-			log(`📅 Date filter: from=${dateFromStr} (${dateFrom.toISOString()}) to=${dateToStr} (${dateTo.toISOString()})`);
-			log(`📊 Sample created_at values: ${state.allCollections.slice(0, 3).map(c => c.created_at).join(', ')}`);
+			log(`📅 Date filter: from=${dateFromStr} → ${dateFrom.toISOString()}`);
+			log(`📅 Date filter: to=${dateToStr} → ${dateTo.toISOString()}`);
 
-			const filtered = state.allCollections.filter(item => {
+			try {
+				const samples = state.allCollections?.slice(0, 3)?.map(c => c.created_at)?.join(', ') || 'NO DATA';
+				log(`📊 Sample created_at values: ${samples}`);
+			} catch (e) {
+				log(`❌ Error getting samples: ${e.message}`);
+			}
+
+			let byMachine = state.allCollections.filter(item => {
 				// Фильтруем по выбранному автомату (по ID)
 				if (state.machineId !== 'all') {
 					return String(item.machine_id) === String(state.machineId);
@@ -1109,13 +1125,16 @@
 
 				// Иначе показываем все
 				return true;
-			}).filter(item => {
+			});
+			log(`After machine/point filter: ${byMachine.length} records`);
+
+			const filtered = byMachine.filter(item => {
 				// Фильтруем по периоду дат
 				const itemDate = new Date(item.created_at);
 				const passes = itemDate >= dateFrom && itemDate <= dateTo;
 				// Логируем первые несколько для debug
-				if (state.allCollections.indexOf(item) < 3) {
-					log(`📅 Item ${item.id}: created_at="${item.created_at}" → ${itemDate.toISOString()} → passes=${passes}`);
+				if (byMachine.indexOf(item) < 5) {
+					log(`  Item ${item.id}: "${item.created_at}" → ${itemDate.toISOString()} passes=${passes}`);
 				}
 				return passes;
 			});
