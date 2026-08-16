@@ -1598,20 +1598,22 @@
 				document.getElementById('recentList').innerHTML = '<div style="color: var(--bs-gray-600); text-align: center; padding: 2rem;">Нет инкассаций</div>';
 			} else {
 				const header = `
-					<div style="display: grid; grid-template-columns: 1.2fr 2fr 2fr 1.5fr 1fr; gap: 1rem; padding: 0.75rem; border-bottom: 2px solid var(--bs-border-color); font-weight: 600; font-size: 0.875rem; color: var(--bs-gray-600);">
+					<div style="display: grid; grid-template-columns: 1.2fr 2fr 2fr 1.5fr 1.5fr 1fr; gap: 1rem; padding: 0.75rem; border-bottom: 2px solid var(--bs-border-color); font-weight: 600; font-size: 0.875rem; color: var(--bs-gray-600);">
 						<div>Дата</div>
 						<div>Точка</div>
 						<div>Автомат</div>
 						<div>Инкассатор</div>
+						<div>Комментарий</div>
 						<div style="text-align: right;">Сумма</div>
 					</div>
 				`;
 				const items = recentDisplay.map(item => `
-					<div style="display: grid; grid-template-columns: 1.2fr 2fr 2fr 1.5fr 1fr; gap: 1rem; padding: 0.75rem; border-bottom: 1px solid var(--bs-border-color); align-items: center; font-size: 0.9rem;">
+					<div style="display: grid; grid-template-columns: 1.2fr 2fr 2fr 1.5fr 1.5fr 1fr; gap: 1rem; padding: 0.75rem; border-bottom: 1px solid var(--bs-border-color); align-items: center; font-size: 0.9rem;">
 						<div style="font-weight: 500;">${new Date(item.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' })} ${new Date(item.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
 						<div>${item.point_name}</div>
 						<div>${item.machine_name}</div>
 						<div>${item.collector}</div>
+						<div style="color: var(--bs-gray-600);">${item.comment ? `📝 ${item.comment}` : '—'}</div>
 						<div style="text-align: right; font-weight: 600; color: #198754;">${item.amount} ₴</div>
 					</div>
 				`).join('');
