@@ -2,6 +2,7 @@
 const BOT_TOKEN = '8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8';
 const API_URL = 'https://api.telegram.org/bot' + BOT_TOKEN;
 const WEBHOOK_URL = 'https://report_toys_2026.evtsarenko.workers.dev/webhook/telegram';
+const SECRET_TOKEN = 'collector_secret_token_2026';
 let lastUpdateId = 0;
 let pollingActive = false;
 let consecutiveErrors = 0;
@@ -52,7 +53,10 @@ async function pollUpdates() {
                 try {
                     await fetch(WEBHOOK_URL, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Telegram-Bot-Api-Secret-Token': SECRET_TOKEN,
+                        },
                         body: JSON.stringify(update),
                     });
                     console.log(`[${now}] ✅ Update ${update.update_id}`);
