@@ -202,7 +202,7 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
       quantity: undefined,
       comment: '',
     };
-    await saveUserState(db, userId, state);
+    await saveUserState(db, kv, userId, state);
 
     // Load points
     try {
@@ -250,7 +250,7 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
 
     state.amount = amount;
     state.step = 'input_quantity';
-    await saveUserState(db, userId, state);
+    await saveUserState(db, kv, userId, state);
     await sendMessage(chatId, `✅ Сумма: ${amount}₴\n\nТеперь введите количество товаров:`, token);
   }
   // Step: Input quantity
@@ -263,7 +263,7 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
 
     state.quantity = quantity;
     state.step = 'ask_comment';
-    await saveUserState(db, userId, state);
+    await saveUserState(db, kv, userId, state);
 
     const keyboard = {
       inline_keyboard: [
@@ -298,7 +298,7 @@ async function handleCallback(callbackQuery: any, db: any, kv: any, token: strin
 
   // Load from cache or DB
   let state = await loadUserState(db, kv, userId);
-  addLog(`📦 Loaded state for user ${userId}:`, state ? JSON.stringify(state) : 'NULL');
+  addLog(`📦 Loaded state for user ${userId}: ${state ? JSON.stringify(state) : 'NULL'}`);
 
   if (!state) {
     addLog(`❌ State not found for user ${userId} - session expired`);
@@ -416,7 +416,7 @@ async function saveCollection(chatId: number, userId: number, state: UserState, 
     }
 
     // Reset state but keep name for next collection
-    await saveUserState(db, userId, {
+    await saveUserState(db, kv, userId, {
       step: 'select_point',
       name: state.name,
       pointId: undefined,

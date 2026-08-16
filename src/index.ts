@@ -305,7 +305,7 @@ async function apiHandler(request: Request, env: Env) {
       if (tgData.ok && tgData.result && tgData.result.length > 0) {
         // Process updates
         for (const update of tgData.result) {
-          await handleTelegramBot(update, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
+          await handleTelegramBot(update, env.D1_REPORT_TOYS, env.BOT_STATE_KV, env.TG_BOT_TOKEN);
         }
         // Save new offset
         const newOffset = tgData.result[tgData.result.length - 1].update_id;
