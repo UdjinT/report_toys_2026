@@ -25,7 +25,10 @@ async function pollUpdates() {
   }
 
   pollingActive = true;
+  const now = new Date().toISOString();
+
   try {
+    console.log(`[${now}] 🔄 Polling...`);
     const url = `${API_URL}/getUpdates?offset=${lastUpdateId + 1}&timeout=5&allowed_updates=message,callback_query`;
     const response = await fetch(url);
     const data = (await response.json()) as any;
@@ -35,7 +38,7 @@ async function pollUpdates() {
       // Exit so Railway can restart us and kill the old one
       if (data.error_code === 409) {
         consecutiveErrors++;
-        console.error(`[409 CONFLICT #${consecutiveErrors}] Another instance detected. Exiting...`);
+        console.error(`[${now}] [409 CONFLICT #${consecutiveErrors}] Another instance detected.`);
         if (consecutiveErrors >= 3) {
           console.error('🛑 Killing process due to repeated 409 conflicts');
           process.exit(1);
@@ -44,14 +47,14 @@ async function pollUpdates() {
       }
 
       consecutiveErrors = 0;
-      console.error('Telegram API error:', data);
+      console.error(`[${now}] ❌ API error:`, data.error_code, data.description);
       return;
     }
 
     consecutiveErrors = 0;
 
     if (data.result && data.result.length > 0) {
-      console.log(`📥 Got ${data.result.length} updates`);
+      console.log(`[${now}] 📥 Got ${data.result.length} updates`);
 
       for (const update of data.result) {
         lastUpdateId = update.update_id;
@@ -62,14 +65,16 @@ async function pollUpdates() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(update),
           });
-          console.log(`✅ Update ${update.update_id}`);
+          console.log(`[${now}] ✅ Update ${update.update_id}`);
         } catch (e) {
-          console.error(`❌ Failed to process update ${update.update_id}:`, e);
+          console.error(`[${now}] ❌ Webhook error:`, (e as Error).message);
         }
       }
+    } else {
+      console.log(`[${now}] ✓ No updates`);
     }
   } catch (error) {
-    console.error('❌ Polling error:', error);
+    console.error(`[${now}] ❌ Poll error:`, (error as Error).message);
   } finally {
     pollingActive = false;
   }
