@@ -1090,6 +1090,9 @@
 			const dateTo = dateToStr ? new Date(dateToStr) : new Date();
 			dateTo.setHours(23, 59, 59, 999);
 
+			log(`📅 Date filter: from=${dateFromStr} (${dateFrom.toISOString()}) to=${dateToStr} (${dateTo.toISOString()})`);
+			log(`📊 Sample created_at values: ${state.allCollections.slice(0, 3).map(c => c.created_at).join(', ')}`);
+
 			const filtered = state.allCollections.filter(item => {
 				// Фильтруем по выбранному автомату (по ID)
 				if (state.machineId !== 'all') {
@@ -1109,7 +1112,12 @@
 			}).filter(item => {
 				// Фильтруем по периоду дат
 				const itemDate = new Date(item.created_at);
-				return itemDate >= dateFrom && itemDate <= dateTo;
+				const passes = itemDate >= dateFrom && itemDate <= dateTo;
+				// Логируем первые несколько для debug
+				if (state.allCollections.indexOf(item) < 3) {
+					log(`📅 Item ${item.id}: created_at="${item.created_at}" → ${itemDate.toISOString()} → passes=${passes}`);
+				}
+				return passes;
 			});
 
 			log(`Filtered ${filtered.length} records from ${state.allCollections.length} total`);
