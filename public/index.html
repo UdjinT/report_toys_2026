@@ -8,7 +8,7 @@
 		// Restore theme immediately before page loads to prevent flashing
 		const savedTheme = localStorage.getItem('theme') || 'light';
 		document.documentElement.setAttribute('data-bs-theme', savedTheme);
-		document.body.setAttribute('data-bs-theme', savedTheme);
+		// Body will be set in init() when DOM is ready
 	</script>
 	<link href="/assets/css/tabler.min.css" rel="stylesheet" />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
