@@ -60,10 +60,20 @@ async function pollUpdates() {
         return;
     }
     console.log('🤖 Bot polling starting...');
+    console.log(`🆔 Instance ID: ${process.pid}`);
     await deleteWebhook();
     console.log('🤖 Bot polling started...');
-    // First poll after 2 seconds to give system time to stabilize
-    setTimeout(pollUpdates, 2000);
+    // First poll after 5 seconds to give system time to stabilize
+    setTimeout(pollUpdates, 5000);
     // Then poll every 5 seconds
     setInterval(pollUpdates, 5000);
+    // Handle graceful shutdown
+    process.on('SIGTERM', () => {
+        console.log('📛 SIGTERM received - shutting down polling');
+        process.exit(0);
+    });
+    process.on('SIGINT', () => {
+        console.log('📛 SIGINT received - shutting down polling');
+        process.exit(0);
+    });
 })();
