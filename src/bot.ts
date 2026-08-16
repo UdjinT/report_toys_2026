@@ -10,30 +10,16 @@ interface UserState {
 
 async function loadUserState(db: any, kv: any, userId: number): Promise<UserState | null> {
   try {
-    const kvKey = `user:${userId}:state`;
-
-    // Try hot cache (KV) first - very fast (~10ms)
-    try {
-      const cached = await kv.get(kvKey, 'json');
-      if (cached) {
-        addLog(`📦 [CACHE HIT] User ${userId} state loaded from KV`);
-        return cached as UserState;
-      }
-    } catch (kvError) {
-      addLog(`⚠️ [KV ERROR] Failed to read from KV: ${kvError}`);
-      // Continue to D1 fallback
-    }
-
-    // Fallback to cold storage (D1)
-    const startTime = Date.now();
     const result = await db.prepare(
       'SELECT step, name, point_id, machine_id, amount, quantity, comment FROM bot_user_states WHERE user_id = ?'
     ).bind(userId).first();
 
-    const loadTime = Date.now() - startTime;
-    addLog(`📦 [D1 READ] User ${userId} took ${loadTime}ms, found: ${!!result}`);
+    if (!result) {
+      addLog(`📦 [D1 READ] User ${userId} - no state found`);
+      return null;
+    }
 
-    if (!result) return null;
+    addLog(`📦 [D1 READ] User ${userId} - found: ${result.step}`);
 
     const state = {
       step: result.step as any,
@@ -45,73 +31,50 @@ async function loadUserState(db: any, kv: any, userId: number): Promise<UserStat
       comment: result.comment,
     };
 
-    // Populate hot cache for next request (24h TTL)
-    try {
-      await kv.put(kvKey, JSON.stringify(state), { expirationTtl: 86400 });
-      addLog(`💾 [KV WRITE] User ${userId} state cached in KV`);
-    } catch (kvError) {
-      addLog(`⚠️ [KV WRITE ERROR] Failed to cache: ${kvError}`);
-    }
-
     return state;
   } catch (e) {
+    addLog(`❌ [D1 READ ERROR] User ${userId}: ${String(e)}`);
     console.error('Error loading user state:', e);
-    addLog(`❌ [LOAD ERROR] ${String(e)}`);
     return null;
   }
 }
 
 async function saveUserState(db: any, kv: any, userId: number, state: UserState): Promise<void> {
-  console.log(`💾 [SAVE START] User ${userId}, state=${state ? 'EXISTS' : 'NULL'}, step=${state?.step}`);
-  addLog(`💾 [SAVE START] User ${userId}, state=${state ? JSON.stringify(state).substring(0, 100) : 'NULL'}`);
-
-  if (!state) {
-    console.error(`❌ [SAVE ERROR] state is NULL/undefined for user ${userId}`);
-    addLog(`❌ [SAVE ERROR] state is NULL/undefined for user ${userId}`);
-    return;
-  }
-
   try {
-    const kvKey = `user:${userId}:state`;
-    const startTime = Date.now();
-
-    // Write to both simultaneously (atomic from user perspective)
-    const [dbResult, kvResult] = await Promise.allSettled([
-      // Cold storage: D1
-      db.prepare(`
-        INSERT INTO bot_user_states (user_id, step, name, point_id, machine_id, amount, quantity, comment)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(user_id) DO UPDATE SET
-          step = excluded.step,
-          name = excluded.name,
-          point_id = excluded.point_id,
-          machine_id = excluded.machine_id,
-          amount = excluded.amount,
-          quantity = excluded.quantity,
-          comment = excluded.comment,
-          updated_at = CURRENT_TIMESTAMP
-      `).bind(userId, state.step, state.name, state.pointId, state.machineId, state.amount, state.quantity, state.comment).run(),
-
-      // Hot cache: KV (24h TTL)
-      kv.put(kvKey, JSON.stringify(state), { expirationTtl: 86400 })
-    ]);
-
-    const saveTime = Date.now() - startTime;
-
-    if (dbResult.status === 'fulfilled') {
-      addLog(`💾 [D1 WRITE] User ${userId} saved (${saveTime}ms)`);
-    } else {
-      addLog(`❌ [D1 ERROR] User ${userId}: ${dbResult.reason}`);
+    if (!state) {
+      addLog(`❌ [SAVE] State is null for user ${userId}`);
+      return;
     }
 
-    if (kvResult.status === 'fulfilled') {
+    addLog(`💾 [D1 WRITE START] User ${userId}: ${state.step}`);
+
+    const result = await db.prepare(`
+      INSERT INTO bot_user_states (user_id, step, name, point_id, machine_id, amount, quantity, comment)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        step = excluded.step,
+        name = excluded.name,
+        point_id = excluded.point_id,
+        machine_id = excluded.machine_id,
+        amount = excluded.amount,
+        quantity = excluded.quantity,
+        comment = excluded.comment,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(userId, state.step, state.name, state.pointId, state.machineId, state.amount, state.quantity, state.comment).run();
+
+    addLog(`✅ [D1 WRITE] User ${userId} saved successfully`);
+
+    // Also try KV cache for speed (but don't fail if it errors)
+    try {
+      const kvKey = `user:${userId}:state`;
+      await kv.put(kvKey, JSON.stringify(state), { expirationTtl: 86400 });
       addLog(`💾 [KV WRITE] User ${userId} cached`);
-    } else {
-      addLog(`⚠️ [KV CACHE ERROR] ${kvResult.reason}`);
+    } catch (kvError) {
+      addLog(`⚠️ [KV ERROR] Failed to cache user ${userId}: ${kvError}`);
     }
   } catch (e) {
-    console.error('Error saving user state:', e);
-    addLog(`❌ [SAVE ERROR] ${String(e)}`);
+    addLog(`❌ [D1 WRITE ERROR] User ${userId}: ${String(e)}`);
+    console.error('D1 write error:', e);
   }
 }
 
