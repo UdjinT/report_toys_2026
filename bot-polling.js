@@ -51,7 +51,8 @@ async function pollUpdates() {
             for (const update of data.result) {
                 lastUpdateId = update.update_id;
                 try {
-                    await fetch(WEBHOOK_URL, {
+                    const updateType = update.message ? 'message' : update.callback_query ? 'callback_query' : 'unknown';
+                    const response = await fetch(WEBHOOK_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ async function pollUpdates() {
                         },
                         body: JSON.stringify(update),
                     });
-                    console.log(`[${now}] ✅ Update ${update.update_id}`);
+                    console.log(`[${now}] ✅ Update ${update.update_id} (${updateType}) sent to webhook, status=${response.status}`);
                 }
                 catch (e) {
                     console.error(`[${now}] ❌ Webhook error:`, e.message);
