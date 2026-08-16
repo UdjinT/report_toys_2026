@@ -989,11 +989,11 @@
 				updateDashboard();
 			});
 
-			// Date range filters
+			// Date range filters (default 90 days to show all data)
 			const today = new Date();
-			const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+			const ninetyDaysAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
 			document.getElementById('dateTo').valueAsDate = today;
-			document.getElementById('dateFrom').valueAsDate = sevenDaysAgo;
+			document.getElementById('dateFrom').valueAsDate = ninetyDaysAgo;
 
 			document.getElementById('dateFrom').addEventListener('change', () => {
 				log(`Date from changed to: ${document.getElementById('dateFrom').value}`);
