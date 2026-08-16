@@ -4,6 +4,7 @@ const API_URL = 'https://api.telegram.org/bot' + BOT_TOKEN;
 const WEBHOOK_URL = 'https://report_toys_2026.evtsarenko.workers.dev/webhook/telegram';
 
 let lastUpdateId = 0;
+let pollingActive = false;
 
 async function deleteWebhook() {
   try {
@@ -18,6 +19,12 @@ async function deleteWebhook() {
 }
 
 async function pollUpdates() {
+  if (pollingActive) {
+    console.log('⏳ Previous poll still in progress, skipping...');
+    return;
+  }
+
+  pollingActive = true;
   try {
     const url = `${API_URL}/getUpdates?offset=${lastUpdateId + 1}&timeout=30&allowed_updates=message,callback_query`;
     const response = await fetch(url);
@@ -46,14 +53,28 @@ async function pollUpdates() {
     }
   } catch (error) {
     console.error('❌ Polling error:', error);
+  } finally {
+    pollingActive = false;
   }
 }
 
 // Poll every 5 seconds
 (async () => {
+  // Only run polling if enabled (default true for backward compatibility)
+  const pollingEnabled = process.env.POLLING_ENABLED !== 'false';
+
+  if (!pollingEnabled) {
+    console.log('⚠️  Polling disabled via POLLING_ENABLED env var');
+    return;
+  }
+
   console.log('🤖 Bot polling starting...');
   await deleteWebhook();
   console.log('🤖 Bot polling started...');
+
+  // First poll after 2 seconds to give system time to stabilize
+  setTimeout(pollUpdates, 2000);
+
+  // Then poll every 5 seconds
   setInterval(pollUpdates, 5000);
-  pollUpdates();
 })();
