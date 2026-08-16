@@ -62,6 +62,13 @@ async function loadUserState(db: any, kv: any, userId: number): Promise<UserStat
 }
 
 async function saveUserState(db: any, kv: any, userId: number, state: UserState): Promise<void> {
+  addLog(`💾 [SAVE START] User ${userId}, state=${state ? JSON.stringify(state).substring(0, 100) : 'NULL'}`);
+
+  if (!state) {
+    addLog(`❌ [SAVE ERROR] state is NULL/undefined for user ${userId}`);
+    return;
+  }
+
   try {
     const kvKey = `user:${userId}:state`;
     const startTime = Date.now();
