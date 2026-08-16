@@ -170,7 +170,8 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
         quantity: undefined,
         comment: '',
       };
-      await saveUserState(db, kv, userId, state);
+      addLog(`📍 About to save state: step=${state?.step}, name=${state?.name}`);
+    await saveUserState(db, kv, userId, state);
       // Load and show points
       try {
         const result = await db.prepare('SELECT id, name FROM points ORDER BY name').all();
@@ -209,6 +210,7 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
       quantity: undefined,
       comment: '',
     };
+    addLog(`📍 About to save state: step=${state?.step}, name=${state?.name}`);
     await saveUserState(db, kv, userId, state);
 
     // Load points
@@ -257,6 +259,7 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
 
     state.amount = amount;
     state.step = 'input_quantity';
+    addLog(`📍 About to save state: step=${state?.step}, name=${state?.name}`);
     await saveUserState(db, kv, userId, state);
     await sendMessage(chatId, `✅ Сумма: ${amount}₴\n\nТеперь введите количество товаров:`, token);
   }
@@ -270,6 +273,7 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
 
     state.quantity = quantity;
     state.step = 'ask_comment';
+    addLog(`📍 About to save state: step=${state?.step}, name=${state?.name}`);
     await saveUserState(db, kv, userId, state);
 
     const keyboard = {
@@ -319,7 +323,8 @@ async function handleCallback(callbackQuery: any, db: any, kv: any, token: strin
       const pointId = parseInt(data.split('_')[1]);
       state.pointId = pointId;
       state.step = 'select_machine';
-      await saveUserState(db, kv, userId, state);
+      addLog(`📍 About to save state: step=${state?.step}, name=${state?.name}`);
+    await saveUserState(db, kv, userId, state);
 
       // Load machines
       const result = await db
@@ -348,7 +353,8 @@ async function handleCallback(callbackQuery: any, db: any, kv: any, token: strin
       const machineId = parseInt(data.split('_')[1]);
       state.machineId = machineId;
       state.step = 'input_amount';
-      await saveUserState(db, kv, userId, state);
+      addLog(`📍 About to save state: step=${state?.step}, name=${state?.name}`);
+    await saveUserState(db, kv, userId, state);
 
       await answerCallback(callbackQuery.id, '', token);
       await editMessage(chatId, messageId, 'Введите сумму инкассации (₴):', token);
@@ -356,7 +362,8 @@ async function handleCallback(callbackQuery: any, db: any, kv: any, token: strin
     // Add comment
     else if (data === 'add_comment') {
       state.step = 'ask_comment';
-      await saveUserState(db, kv, userId, state);
+      addLog(`📍 About to save state: step=${state?.step}, name=${state?.name}`);
+    await saveUserState(db, kv, userId, state);
       await answerCallback(callbackQuery.id, '', token);
       await editMessage(chatId, messageId, '✏️ Введите комментарий:', token);
     }
