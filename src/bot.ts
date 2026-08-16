@@ -203,7 +203,9 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
   }
 
   // If no state, initialize with name
+  addLog(`🔍 Checking if state exists: ${!!state}`);
   if (!state) {
+    addLog(`🆕 No state found, creating new state object`);
     state = {
       step: 'ask_name',
       name: text,
@@ -213,6 +215,7 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
       quantity: undefined,
       comment: '',
     };
+    addLog(`✅ Created state object: step=${state.step}, name=${state.name}`);
     addLog(`📍 About to save state: step=${state?.step}, name=${state?.name}`);
     await saveUserState(db, kv, userId, state);
 
