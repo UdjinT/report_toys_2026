@@ -72,9 +72,21 @@ export default {
 
         await handleTelegramBot(body, env.D1_REPORT_TOYS, env.BOT_STATE_KV, env.TG_BOT_TOKEN);
         console.log('✅ [WEBHOOK] handleTelegramBot completed');
+
+        // Log all debug messages from bot handler
+        if (debugLogs.length > 0) {
+          console.log('📋 [WEBHOOK] Debug logs from bot:');
+          debugLogs.forEach(log => console.log(`  ${log}`));
+          debugLogs.length = 0;
+        }
       } catch (e) {
         console.error('❌ [WEBHOOK] Telegram error:', e);
         console.error('❌ [WEBHOOK] Stack:', e instanceof Error ? e.stack : 'no stack');
+        if (debugLogs.length > 0) {
+          console.log('📋 [WEBHOOK] Debug logs from bot (error case):');
+          debugLogs.forEach(log => console.log(`  ${log}`));
+          debugLogs.length = 0;
+        }
       }
       return new Response('OK');
     }

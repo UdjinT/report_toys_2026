@@ -52,6 +52,8 @@ async function pollUpdates() {
                 lastUpdateId = update.update_id;
                 try {
                     const updateType = update.message ? 'message' : update.callback_query ? 'callback_query' : 'unknown';
+                    const userId = update.message?.from?.id || update.callback_query?.from?.id || '?';
+                    const updateData = update.message?.text || update.callback_query?.data || '?';
                     const response = await fetch(WEBHOOK_URL, {
                         method: 'POST',
                         headers: {
@@ -60,7 +62,11 @@ async function pollUpdates() {
                         },
                         body: JSON.stringify(update),
                     });
-                    console.log(`[${now}] ✅ Update ${update.update_id} (${updateType}) sent to webhook, status=${response.status}`);
+                    const respText = await response.text();
+                    console.log(`[${now}] ✅ Update ${update.update_id} (${updateType}, user=${userId}, data="${updateData}") → ${response.status}`);
+                    if (response.status !== 200) {
+                        console.error(`[${now}] ⚠️ Unexpected status: ${respText?.substring(0, 100)}`);
+                    }
                 }
                 catch (e) {
                     console.error(`[${now}] ❌ Webhook error:`, e.message);
