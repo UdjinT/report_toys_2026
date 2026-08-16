@@ -8,15 +8,34 @@ interface UserState {
   comment?: string;
 }
 
-async function loadUserState(db: any, userId: number): Promise<UserState | null> {
+async function loadUserState(db: any, kv: any, userId: number): Promise<UserState | null> {
   try {
+    const kvKey = `user:${userId}:state`;
+
+    // Try hot cache (KV) first - very fast (~10ms)
+    try {
+      const cached = await kv.get(kvKey, 'json');
+      if (cached) {
+        addLog(`📦 [CACHE HIT] User ${userId} state loaded from KV`);
+        return cached as UserState;
+      }
+    } catch (kvError) {
+      addLog(`⚠️ [KV ERROR] Failed to read from KV: ${kvError}`);
+      // Continue to D1 fallback
+    }
+
+    // Fallback to cold storage (D1)
+    const startTime = Date.now();
     const result = await db.prepare(
       'SELECT step, name, point_id, machine_id, amount, quantity, comment FROM bot_user_states WHERE user_id = ?'
     ).bind(userId).first();
 
+    const loadTime = Date.now() - startTime;
+    addLog(`📦 [D1 READ] User ${userId} took ${loadTime}ms, found: ${!!result}`);
+
     if (!result) return null;
 
-    return {
+    const state = {
       step: result.step as any,
       name: result.name,
       pointId: result.point_id,
@@ -25,29 +44,65 @@ async function loadUserState(db: any, userId: number): Promise<UserState | null>
       quantity: result.quantity,
       comment: result.comment,
     };
+
+    // Populate hot cache for next request (24h TTL)
+    try {
+      await kv.put(kvKey, JSON.stringify(state), { expirationTtl: 86400 });
+      addLog(`💾 [KV WRITE] User ${userId} state cached in KV`);
+    } catch (kvError) {
+      addLog(`⚠️ [KV WRITE ERROR] Failed to cache: ${kvError}`);
+    }
+
+    return state;
   } catch (e) {
     console.error('Error loading user state:', e);
+    addLog(`❌ [LOAD ERROR] ${String(e)}`);
     return null;
   }
 }
 
-async function saveUserState(db: any, userId: number, state: UserState): Promise<void> {
+async function saveUserState(db: any, kv: any, userId: number, state: UserState): Promise<void> {
   try {
-    await db.prepare(`
-      INSERT INTO bot_user_states (user_id, step, name, point_id, machine_id, amount, quantity, comment)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(user_id) DO UPDATE SET
-        step = excluded.step,
-        name = excluded.name,
-        point_id = excluded.point_id,
-        machine_id = excluded.machine_id,
-        amount = excluded.amount,
-        quantity = excluded.quantity,
-        comment = excluded.comment,
-        updated_at = CURRENT_TIMESTAMP
-    `).bind(userId, state.step, state.name, state.pointId, state.machineId, state.amount, state.quantity, state.comment).run();
+    const kvKey = `user:${userId}:state`;
+    const startTime = Date.now();
+
+    // Write to both simultaneously (atomic from user perspective)
+    const [dbResult, kvResult] = await Promise.allSettled([
+      // Cold storage: D1
+      db.prepare(`
+        INSERT INTO bot_user_states (user_id, step, name, point_id, machine_id, amount, quantity, comment)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+          step = excluded.step,
+          name = excluded.name,
+          point_id = excluded.point_id,
+          machine_id = excluded.machine_id,
+          amount = excluded.amount,
+          quantity = excluded.quantity,
+          comment = excluded.comment,
+          updated_at = CURRENT_TIMESTAMP
+      `).bind(userId, state.step, state.name, state.pointId, state.machineId, state.amount, state.quantity, state.comment).run(),
+
+      // Hot cache: KV (24h TTL)
+      kv.put(kvKey, JSON.stringify(state), { expirationTtl: 86400 })
+    ]);
+
+    const saveTime = Date.now() - startTime;
+
+    if (dbResult.status === 'fulfilled') {
+      addLog(`💾 [D1 WRITE] User ${userId} saved (${saveTime}ms)`);
+    } else {
+      addLog(`❌ [D1 ERROR] User ${userId}: ${dbResult.reason}`);
+    }
+
+    if (kvResult.status === 'fulfilled') {
+      addLog(`💾 [KV WRITE] User ${userId} cached`);
+    } else {
+      addLog(`⚠️ [KV CACHE ERROR] ${kvResult.reason}`);
+    }
   } catch (e) {
     console.error('Error saving user state:', e);
+    addLog(`❌ [SAVE ERROR] ${String(e)}`);
   }
 }
 
@@ -60,7 +115,7 @@ const addLog = (msg: string) => {
 
 export { debugLogs };
 
-export async function handleTelegramBot(update: any, db: any, token: string) {
+export async function handleTelegramBot(update: any, db: any, kv: any, token: string) {
   try {
     addLog('🤖 TG Update: ' + update.update_id);
     addLog('📨 Update data: ' + JSON.stringify(update).substring(0, 200));
@@ -70,10 +125,10 @@ export async function handleTelegramBot(update: any, db: any, token: string) {
 
     if (message) {
       addLog('✅ Has message, calling handleMessage');
-      await handleMessage(message, db, token);
+      await handleMessage(message, db, kv, token);
     } else if (callbackQuery) {
       addLog('✅ Has callback_query, calling handleCallback');
-      await handleCallback(callbackQuery, db, token);
+      await handleCallback(callbackQuery, db, kv, token);
     } else {
       addLog('⚠️ No message or callback_query found');
     }
@@ -82,7 +137,7 @@ export async function handleTelegramBot(update: any, db: any, token: string) {
   }
 }
 
-async function handleMessage(message: any, db: any, token: string) {
+async function handleMessage(message: any, db: any, kv: any, token: string) {
   const userId = message.from.id;
   const chatId = message.chat.id;
   const text = message.text;
@@ -90,7 +145,7 @@ async function handleMessage(message: any, db: any, token: string) {
   addLog(`📝 Message from ${userId}: ${text}`);
 
   // Load from cache or DB
-  let state = await loadUserState(db, userId);
+  let state = await loadUserState(db, kv, userId);
 
   // Handle /start command
   if (text === '/start') {
@@ -108,7 +163,7 @@ async function handleMessage(message: any, db: any, token: string) {
         quantity: undefined,
         comment: '',
       };
-      await saveUserState(db, userId, state);
+      await saveUserState(db, kv, userId, state);
       // Load and show points
       try {
         const result = await db.prepare('SELECT id, name FROM points ORDER BY name').all();
@@ -229,11 +284,11 @@ async function handleMessage(message: any, db: any, token: string) {
   // Step: Input comment
   else if (state.step === 'ask_comment') {
     state.comment = text;
-    await saveCollection(chatId, userId, state, db, token);
+    await saveCollection(chatId, userId, state, db, kv, token);
   }
 }
 
-async function handleCallback(callbackQuery: any, db: any, token: string) {
+async function handleCallback(callbackQuery: any, db: any, kv: any, token: string) {
   const userId = callbackQuery.from.id;
   const chatId = callbackQuery.message.chat.id;
   const data = callbackQuery.data;
@@ -242,7 +297,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
   addLog(`🔘 Button from ${userId}: ${data}`);
 
   // Load from cache or DB
-  let state = await loadUserState(db, userId);
+  let state = await loadUserState(db, kv, userId);
   addLog(`📦 Loaded state for user ${userId}:`, state ? JSON.stringify(state) : 'NULL');
 
   if (!state) {
@@ -257,7 +312,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
       const pointId = parseInt(data.split('_')[1]);
       state.pointId = pointId;
       state.step = 'select_machine';
-      await saveUserState(db, userId, state);
+      await saveUserState(db, kv, userId, state);
 
       // Load machines
       const result = await db
@@ -286,7 +341,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
       const machineId = parseInt(data.split('_')[1]);
       state.machineId = machineId;
       state.step = 'input_amount';
-      await saveUserState(db, userId, state);
+      await saveUserState(db, kv, userId, state);
 
       await answerCallback(callbackQuery.id, '', token);
       await editMessage(chatId, messageId, 'Введите сумму инкассации (₴):', token);
@@ -294,7 +349,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
     // Add comment
     else if (data === 'add_comment') {
       state.step = 'ask_comment';
-      await saveUserState(db, userId, state);
+      await saveUserState(db, kv, userId, state);
       await answerCallback(callbackQuery.id, '', token);
       await editMessage(chatId, messageId, '✏️ Введите комментарий:', token);
     }
@@ -302,7 +357,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
     else if (data === 'skip_comment') {
       state.comment = '';
       await answerCallback(callbackQuery.id, '', token);
-      await saveCollection(chatId, userId, state, db, token);
+      await saveCollection(chatId, userId, state, db, kv, token);
     }
   } catch (error) {
     console.error('❌ Callback error:', error);
@@ -310,7 +365,7 @@ async function handleCallback(callbackQuery: any, db: any, token: string) {
   }
 }
 
-async function saveCollection(chatId: number, userId: number, state: UserState, db: any, token: string) {
+async function saveCollection(chatId: number, userId: number, state: UserState, db: any, kv: any, token: string) {
   try {
     // Save to database
     const now = new Date().toISOString();

@@ -13,6 +13,11 @@ database_name = "report_toys_2026"
 # database_id added after creation
 # database_id = "22ec155c-31da-4c92-97ca-712c20d8f5ef"
 
+[[kv_namespaces]]
+binding = "BOT_STATE_KV"
+id = "bot_state_kv"
+preview_id = "bot_state_kv_preview"
+
 [env.production]
 vars = { TG_BOT_TOKEN = "8952606142:AAHXzZ-5FrdRqNCc3GRd_9--yuq_YGXPmG8", TG_BOT_SECRET = "collector_secret_token_2026" }
 

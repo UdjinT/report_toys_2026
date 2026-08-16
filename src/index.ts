@@ -13,6 +13,7 @@ import {
 
 export interface Env {
   D1_REPORT_TOYS: D1Database;
+  BOT_STATE_KV: KVNamespace;
   TG_BOT_TOKEN: string;
   TG_BOT_SECRET: string;
   ADMIN_PASSWORD_HASH: string;
@@ -69,7 +70,7 @@ export default {
         }
         console.log('✅ [WEBHOOK] TG_BOT_TOKEN is set');
 
-        await handleTelegramBot(body, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
+        await handleTelegramBot(body, env.D1_REPORT_TOYS, env.BOT_STATE_KV, env.TG_BOT_TOKEN);
         console.log('✅ [WEBHOOK] handleTelegramBot completed');
       } catch (e) {
         console.error('❌ [WEBHOOK] Telegram error:', e);
@@ -206,7 +207,7 @@ export default {
             text: 'Иван Иванов'
           }
         };
-        await handleTelegramBot(testUpdate, env.D1_REPORT_TOYS, env.TG_BOT_TOKEN);
+        await handleTelegramBot(testUpdate, env.D1_REPORT_TOYS, env.BOT_STATE_KV, env.TG_BOT_TOKEN);
         return new Response(JSON.stringify({ ok: true, logs: debugLogs }), {
           headers: { 'Content-Type': 'application/json' }
         });
