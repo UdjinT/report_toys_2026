@@ -145,14 +145,15 @@ export async function handleTelegramBot(update: any, db: any, kv: any, token: st
 }
 
 async function handleMessage(message: any, db: any, kv: any, token: string) {
-  const userId = message.from.id;
-  const chatId = message.chat.id;
-  const text = message.text;
+  try {
+    const userId = message.from.id;
+    const chatId = message.chat.id;
+    const text = message.text;
 
-  addLog(`📝 Message from ${userId}: ${text}`);
+    addLog(`📝 Message from ${userId}: ${text}`);
 
-  // Load from cache or DB
-  let state = await loadUserState(db, kv, userId);
+    // Load from cache or DB
+    let state = await loadUserState(db, kv, userId);
 
   // Handle /start command
   if (text === '/start') {
@@ -292,10 +293,14 @@ async function handleMessage(message: any, db: any, kv: any, token: string) {
       keyboard
     );
   }
-  // Step: Input comment
-  else if (state.step === 'ask_comment') {
-    state.comment = text;
-    await saveCollection(chatId, userId, state, db, kv, token);
+    // Step: Input comment
+    else if (state.step === 'ask_comment') {
+      state.comment = text;
+      await saveCollection(chatId, userId, state, db, kv, token);
+    }
+  } catch (error) {
+    addLog(`❌ handleMessage error: ${String(error)}`);
+    addLog(`Stack: ${error instanceof Error ? error.stack : 'no stack'}`);
   }
 }
 
